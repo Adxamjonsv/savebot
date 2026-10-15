@@ -150,4 +150,3 @@ If the build still reports `secret <number> not found`, inspect the service's Va
 - **Platform changes**: Instagram and TikTok may change their APIs or add protections at any time, which can break yt-dlp extraction temporarily until yt-dlp releases an update.
 - **Rate limits**: Both platforms enforce rate limits. The bot uses sensible delays but heavy usage from a single IP may trigger blocks.
 - **FFmpeg**: Without FFmpeg, the bot falls back to single-file formats which may have lower quality.
-
