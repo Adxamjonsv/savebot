@@ -6,203 +6,1134 @@
   <meta name="theme-color" content="#10131b">
   <title>Savebot — Admin panel</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
   <style>
-    :root{color-scheme:dark;--bg:var(--tg-theme-bg-color,#0d1119);--panel:var(--tg-theme-secondary-bg-color,#171d29);--panel2:#1d2534;--text:var(--tg-theme-text-color,#f4f6fb);--muted:var(--tg-theme-hint-color,#9aa7bb);--accent:var(--tg-theme-button-color,#7868ff);--line:rgba(160,176,204,.16);--danger:#ff7188;--good:#4bd5a2;--radius:18px}
-    *{box-sizing:border-box}html{min-height:100%;background:var(--bg)}body{margin:0;background:radial-gradient(ellipse at top right,rgba(120,104,255,.10),transparent 34%),var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input{font:inherit}button,a{ -webkit-tap-highlight-color:transparent}button{cursor:pointer}.wrap{width:min(1120px,100%);margin:auto;padding:18px 15px calc(32px + env(safe-area-inset-bottom))}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}.brand{display:flex;align-items:center;gap:11px;min-width:0}.logo{width:45px;height:45px;display:grid;place-items:center;flex:0 0 45px;border-radius:15px;background:linear-gradient(135deg,#8c7cff,#5746e8);box-shadow:0 8px 24px #6657ff33;font-size:21px;font-weight:900}.title{font-size:20px;font-weight:850;letter-spacing:-.5px}.subtitle{color:var(--muted);font-size:12px}.connection{display:flex;align-items:center;gap:7px;white-space:nowrap;border:1px solid var(--line);background:var(--panel);border-radius:30px;padding:7px 10px;color:var(--muted);font-size:11px}.dot{width:7px;height:7px;border-radius:50%;background:var(--good)}.dot.bad{background:var(--danger)}.section{margin-top:22px}.section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px}.section-head h2{margin:0;font-size:17px;letter-spacing:-.2px}.section-head p{margin:3px 0 0;color:var(--muted);font-size:12px}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}.stat{min-width:0;padding:15px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(145deg,var(--panel),rgba(23,29,41,.82))}.stat-label{font-size:12px;color:var(--muted)}.stat-num{font-size:27px;font-weight:850;letter-spacing:-.8px;margin-top:6px;overflow-wrap:anywhere}.stat-icon{font-size:18px;margin-bottom:8px}.platforms{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}.platform{position:relative;overflow:hidden;display:flex;align-items:center;gap:12px;text-align:left;width:100%;min-width:0;padding:14px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);color:var(--text);transition:transform .15s,border-color .15s}.platform:active{transform:scale(.985)}.platform:hover,.platform.active{border-color:var(--accent)}.platform.active{box-shadow:0 0 0 1px var(--accent) inset;background:linear-gradient(135deg,rgba(120,104,255,.16),var(--panel))}.platform-icon{width:43px;height:43px;flex:0 0 43px;display:grid;place-items:center;border-radius:14px;background:var(--panel2);font-size:21px}.platform-name{font-weight:750;font-size:13px}.platform-count{font-size:12px;color:var(--muted);margin-top:3px}.platform-arrow{margin-left:auto;color:var(--muted);font-size:19px}.toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:13px}.search{flex:1 1 180px;min-width:0;width:100%;padding:12px 13px;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:13px;outline:none}.search:focus{border-color:var(--accent)}.select{padding:11px 12px;max-width:100%;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:12px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 13px;border:0;border-radius:12px;background:var(--accent);color:#fff;font-weight:750;text-decoration:none}.btn.secondary{background:transparent;border:1px solid var(--line);color:var(--text)}.btn:disabled{opacity:.5;cursor:wait}.gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.media-card{min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:17px;background:var(--panel)}.preview{position:relative;aspect-ratio:16/10;background:#080b10;display:grid;place-items:center;overflow:hidden}.preview video{display:block;width:100%;height:100%;object-fit:contain;background:#05070a}.preview-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--muted);padding:20px;text-align:center}.play-symbol{display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:#ffffff16;border:1px solid #ffffff2a;font-size:23px}.unavailable{font-size:12px;color:var(--danger)}.media-info{padding:12px}.media-title{font-size:13px;font-weight:750;overflow-wrap:anywhere;word-break:break-word}.media-meta{font-size:11px;color:var(--muted);margin-top:5px;overflow-wrap:anywhere}.media-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}.media-actions .btn{font-size:12px;padding:8px 10px}.tag{display:inline-flex;align-items:center;padding:4px 7px;border-radius:7px;background:rgba(120,104,255,.15);color:#c6bdff;font-size:10px;font-weight:750;margin-bottom:7px}.users{display:grid;gap:9px}.user{display:flex;align-items:center;gap:11px;min-width:0;padding:12px;border:1px solid var(--line);border-radius:15px;background:var(--panel)}.avatar{width:42px;height:42px;flex:0 0 42px;border-radius:14px;display:grid;place-items:center;background:rgba(120,104,255,.19);font-weight:850;font-size:16px}.user-info{flex:1;min-width:0}.user-name{font-weight:750;overflow-wrap:anywhere}.user-meta{font-size:11px;color:var(--muted);overflow-wrap:anywhere}.downloads{display:grid;gap:10px}.download{padding:13px;border:1px solid var(--line);border-radius:15px;background:var(--panel);min-width:0}.download-title{font-weight:750;overflow-wrap:anywhere}.download-meta{font-size:11px;color:var(--muted);margin:5px 0 10px;overflow-wrap:anywhere}.actions{display:flex;gap:8px;flex-wrap:wrap}.status,.empty{padding:22px 15px;text-align:center;color:var(--muted);border:1px dashed var(--line);background:var(--panel);border-radius:15px}.status.error{color:var(--danger);white-space:pre-wrap;overflow-wrap:anywhere}.hidden{display:none!important}.back{margin-bottom:12px}.foot{text-align:center;margin-top:27px;color:var(--muted);font-size:11px}.view-tabs{display:flex;gap:7px;margin:0 0 16px;padding:4px;background:var(--panel);border:1px solid var(--line);border-radius:14px}.tab{flex:1;padding:10px 8px;border:0;border-radius:10px;background:transparent;color:var(--muted);font-weight:750}.tab.active{background:var(--panel2);color:var(--text)}
-    @media(max-width:760px){.gallery{grid-template-columns:repeat(2,minmax(0,1fr))}.platforms{grid-template-columns:repeat(2,minmax(0,1fr))}.platform{padding:12px;gap:9px}.platform-icon{width:39px;height:39px;flex-basis:39px}.wrap{padding:14px 12px 28px}.stat{padding:12px}.stat-num{font-size:24px}}
-    @media(max-width:420px){.gallery{grid-template-columns:1fr}.preview{aspect-ratio:16/9}.stats{gap:7px}.stat{padding:10px}.stat-label{font-size:10px}.stat-num{font-size:22px}.title{font-size:18px}.logo{width:40px;height:40px;flex-basis:40px}.connection{font-size:10px;padding:6px 8px}.platform-name{font-size:12px}.platform-count{font-size:11px}.user .btn{padding:9px 10px;font-size:12px}}
+    :root {
+      color-scheme: dark;
+      --bg: var(--tg-theme-bg-color, #101720);
+      --panel: var(--tg-theme-secondary-bg-color, #202c3b);
+      --panel2: #273548;
+      --text: var(--tg-theme-text-color, #f5f7fb);
+      --muted: var(--tg-theme-hint-color, #94a6bf);
+      --accent: var(--tg-theme-button-color, #548fca);
+      --line: rgba(160,176,204,.18);
+      --danger: #ff7188;
+      --good: #4bd5a2;
+      --radius: 17px;
+    }
+
+    * { box-sizing: border-box; }
+
+    html {
+      min-height: 100%;
+      background: var(--bg);
+    }
+
+    body {
+      margin: 0;
+      background: radial-gradient(ellipse at top right, rgba(84,143,202,.10), transparent 35%), var(--bg);
+      color: var(--text);
+      font: 14px/1.45 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    button, input, select { font: inherit; }
+    button, a { -webkit-tap-highlight-color: transparent; }
+    button { cursor: pointer; }
+
+    .wrap {
+      width: min(1120px, 100%);
+      margin: auto;
+      padding: 16px 14px calc(32px + env(safe-area-inset-bottom));
+    }
+
+    .top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 0;
+    }
+
+    .logo {
+      width: 44px;
+      height: 44px;
+      flex: 0 0 44px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #8c7cff, #5746e8);
+      font-size: 21px;
+      font-weight: 900;
+    }
+
+    .title { font-size: 20px; font-weight: 850; }
+    .subtitle { color: var(--muted); font-size: 12px; }
+
+    .connection {
+      display: flex;
+      align-items: center;
+      gap: 7px;
+      white-space: nowrap;
+      border: 1px solid var(--line);
+      background: var(--panel);
+      border-radius: 30px;
+      padding: 7px 10px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--good);
+    }
+
+    .dot.bad { background: var(--danger); }
+
+    .section { margin-top: 23px; }
+
+    .section-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+
+    .section-head h2 { margin: 0; font-size: 17px; }
+    .section-head p { margin: 3px 0 0; color: var(--muted); font-size: 12px; }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .stat {
+      min-width: 0;
+      padding: 14px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+    }
+
+    .stat-label { color: var(--muted); font-size: 12px; }
+    .stat-num { margin-top: 6px; font-size: 26px; font-weight: 850; overflow-wrap: anywhere; }
+    .stat-icon { margin-bottom: 8px; font-size: 18px; }
+
+    .platforms {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 10px;
+    }
+
+    .platform {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      width: 100%;
+      min-width: 0;
+      padding: 13px;
+      text-align: left;
+      color: var(--text);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+    }
+
+    .platform:hover, .platform.active { border-color: var(--accent); }
+
+    .platform.active {
+      box-shadow: inset 0 0 0 1px var(--accent);
+      background: rgba(84,143,202,.12);
+    }
+
+    .platform-icon {
+      width: 40px;
+      height: 40px;
+      flex: 0 0 40px;
+      display: grid;
+      place-items: center;
+      border-radius: 12px;
+      background: var(--panel2);
+      font-size: 20px;
+    }
+
+    .platform-name { font-size: 13px; font-weight: 750; }
+    .platform-count { margin-top: 3px; color: var(--muted); font-size: 11px; }
+
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 9px;
+      flex-wrap: wrap;
+      margin-bottom: 13px;
+    }
+
+    .search {
+      flex: 1 1 180px;
+      min-width: 0;
+      width: 100%;
+      padding: 12px;
+      color: var(--text);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      outline: none;
+    }
+
+    .search:focus { border-color: var(--accent); }
+
+    .select {
+      max-width: 100%;
+      padding: 11px;
+      color: var(--text);
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      padding: 10px 13px;
+      color: white;
+      background: var(--accent);
+      border: 0;
+      border-radius: 12px;
+      font-weight: 750;
+      text-decoration: none;
+    }
+
+    .btn.secondary {
+      color: var(--text);
+      background: transparent;
+      border: 1px solid var(--line);
+    }
+
+    .btn:disabled { opacity: .5; }
+
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      align-items: start;
+      gap: 13px;
+    }
+
+    .media-card {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      align-self: start;
+      overflow: hidden;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 17px;
+    }
+
+    /* Video va uning ma'lumotlari alohida bloklarda */
+    .preview {
+      position: relative;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      background: #080b10;
+    }
+
+    .preview video,
+    .preview img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #05070a;
+    }
+
+    .preview-placeholder {
+      width: 100%;
+      height: 100%;
+      min-height: 130px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 16px;
+      color: var(--muted);
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .play-symbol {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 50%;
+      background: #ffffff16;
+      border: 1px solid #ffffff2a;
+      font-size: 22px;
+    }
+
+    .media-info {
+      display: block;
+      position: relative;
+      width: 100%;
+      min-width: 0;
+      padding: 12px;
+      background: var(--panel);
+      border-top: 1px solid var(--line);
+    }
+
+    .tag {
+      display: inline-flex;
+      padding: 4px 7px;
+      margin-bottom: 7px;
+      border-radius: 7px;
+      background: rgba(120,104,255,.15);
+      color: #c6bdff;
+      font-size: 10px;
+      font-weight: 750;
+    }
+
+    .media-title {
+      font-size: 13px;
+      font-weight: 750;
+      overflow-wrap: anywhere;
+      word-break: break-word;
+    }
+
+    .media-meta {
+      margin-top: 5px;
+      color: var(--muted);
+      font-size: 11px;
+      overflow-wrap: anywhere;
+    }
+
+    .media-actions {
+      display: flex;
+      gap: 7px;
+      flex-wrap: wrap;
+      margin-top: 11px;
+    }
+
+    .media-actions .btn { padding: 8px 10px; font-size: 12px; }
+
+    .users { display: grid; gap: 9px; }
+
+    .user {
+      display: flex;
+      align-items: center;
+      gap: 11px;
+      min-width: 0;
+      padding: 12px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 15px;
+    }
+
+    .avatar {
+      width: 42px;
+      height: 42px;
+      flex: 0 0 42px;
+      display: grid;
+      place-items: center;
+      border-radius: 14px;
+      background: rgba(120,104,255,.19);
+      font-size: 16px;
+      font-weight: 850;
+    }
+
+    .user-info { flex: 1; min-width: 0; }
+    .user-name { font-weight: 750; overflow-wrap: anywhere; }
+    .user-meta { color: var(--muted); font-size: 11px; overflow-wrap: anywhere; }
+
+    .downloads { display: grid; gap: 10px; }
+
+    .download {
+      min-width: 0;
+      padding: 13px;
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 15px;
+    }
+
+    .download-title { font-weight: 750; overflow-wrap: anywhere; }
+    .download-meta { margin: 5px 0 10px; color: var(--muted); font-size: 11px; overflow-wrap: anywhere; }
+
+    .history-media-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 10px;
+      margin: 12px 0;
+    }
+
+    .history-media {
+      min-width: 0;
+      overflow: hidden;
+      background: #080b10;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+    }
+
+    .history-media-preview {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      width: 100%;
+      aspect-ratio: 16 / 9;
+      overflow: hidden;
+      padding: 10px;
+      color: var(--muted);
+      background: #080b10;
+      text-align: center;
+      cursor: pointer;
+    }
+
+    .history-media-preview video,
+    .history-media-preview img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      background: #05070a;
+    }
+
+    .history-media-name {
+      padding: 8px;
+      color: var(--muted);
+      font-size: 11px;
+      overflow-wrap: anywhere;
+    }
+
+    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    .status, .empty {
+      padding: 22px 15px;
+      text-align: center;
+      color: var(--muted);
+      background: var(--panel);
+      border: 1px dashed var(--line);
+      border-radius: 15px;
+    }
+
+    .status.error { color: var(--danger); white-space: pre-wrap; overflow-wrap: anywhere; }
+    .unavailable { color: var(--danger); font-size: 12px; }
+    .hidden { display: none !important; }
+    .foot { margin-top: 27px; color: var(--muted); font-size: 11px; text-align: center; }
+
+    @media (max-width: 760px) {
+      .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .platforms { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .platform { padding: 11px; gap: 8px; }
+      .platform-icon { width: 37px; height: 37px; flex-basis: 37px; }
+      .wrap { padding: 14px 12px 28px; }
+      .stat { padding: 11px; }
+      .stat-num { font-size: 23px; }
+    }
+
+    @media (max-width: 420px) {
+      .gallery { grid-template-columns: 1fr; }
+      .stats { gap: 7px; }
+      .stat { padding: 9px; }
+      .stat-label { font-size: 10px; }
+      .stat-num { font-size: 21px; }
+      .title { font-size: 18px; }
+      .logo { width: 39px; height: 39px; flex-basis: 39px; }
+      .connection { font-size: 10px; padding: 6px 8px; }
+      .platform-name { font-size: 12px; }
+    }
   </style>
 </head>
+
 <body>
 <main class="wrap">
   <header class="top">
-    <div class="brand"><div class="logo">S</div><div><div class="title">Savebot Admin</div><div class="subtitle">Yuklamalar boshqaruvi</div></div></div>
-    <div class="connection"><span class="dot" id="connectionDot"></span><span id="connection">Ulanmoqda…</span></div>
+    <div class="brand">
+      <div class="logo">S</div>
+      <div>
+        <div class="title">Savebot Admin</div>
+        <div class="subtitle">Yuklamalar boshqaruvi</div>
+      </div>
+    </div>
+    <div class="connection">
+      <span class="dot" id="connectionDot"></span>
+      <span id="connection">Ulanmoqda…</span>
+    </div>
   </header>
 
   <div id="status" class="status">Admin ma’lumotlari yuklanmoqda…</div>
+
   <section id="app" class="hidden">
     <div class="stats">
-      <article class="stat"><div class="stat-icon">👥</div><div class="stat-label">Jami foydalanuvchilar</div><div class="stat-num" id="totalUsers">—</div></article>
-      <article class="stat"><div class="stat-icon">⬇️</div><div class="stat-label">Jami yuklamalar</div><div class="stat-num" id="totalDownloads">—</div></article>
-      <article class="stat"><div class="stat-icon">🟢</div><div class="stat-label">Bugun faol</div><div class="stat-num" id="todayActive">—</div></article>
+      <article class="stat">
+        <div class="stat-icon">👥</div>
+        <div class="stat-label">Jami foydalanuvchilar</div>
+        <div class="stat-num" id="totalUsers">—</div>
+      </article>
+      <article class="stat">
+        <div class="stat-icon">⬇️</div>
+        <div class="stat-label">Jami yuklamalar</div>
+        <div class="stat-num" id="totalDownloads">—</div>
+      </article>
+      <article class="stat">
+        <div class="stat-icon">🟢</div>
+        <div class="stat-label">Bugun faol</div>
+        <div class="stat-num" id="todayActive">—</div>
+      </article>
     </div>
 
     <section class="section" id="platformSection">
-      <div class="section-head"><div><h2>Media galereyasi</h2><p>Platformani tanlang — saqlangan videolar ochiladi</p></div><button class="btn secondary" id="refreshGallery" type="button">↻ Yangilash</button></div>
-      <div class="platforms" id="platforms">
-        <button class="platform active" data-platform="all" type="button"><span class="platform-icon">🗂️</span><span><span class="platform-name">Barchasi</span><span class="platform-count" id="count-all">Barcha media</span></span><span class="platform-arrow">›</span></button>
-        <button class="platform" data-platform="instagram" type="button"><span class="platform-icon">📸</span><span><span class="platform-name">Instagram</span><span class="platform-count" id="count-instagram">Media</span></span><span class="platform-arrow">›</span></button>
-        <button class="platform" data-platform="youtube" type="button"><span class="platform-icon">▶️</span><span><span class="platform-name">YouTube</span><span class="platform-count" id="count-youtube">Media</span></span><span class="platform-arrow">›</span></button>
-        <button class="platform" data-platform="tiktok" type="button"><span class="platform-icon">🎵</span><span><span class="platform-name">TikTok</span><span class="platform-count" id="count-tiktok">Media</span></span><span class="platform-arrow">›</span></button>
+      <div class="section-head">
+        <div>
+          <h2>Media galereyasi</h2>
+          <p>Platformani tanlang — saqlangan videolar ochiladi</p>
+        </div>
+        <button class="btn secondary" id="refreshGallery" type="button">↻ Yangilash</button>
       </div>
-    </section>
 
-    <section class="section" id="gallerySection">
-      <div class="section-head"><div><h2 id="galleryTitle">Barcha media</h2><p id="gallerySubtitle">Arxivdagi video va fayllar</p></div><span class="subtitle" id="galleryCount">0 ta</span></div>
-      <div class="toolbar"><input class="search" id="gallerySearch" type="search" placeholder="Fayl, foydalanuvchi yoki ID bo‘yicha qidirish…" autocomplete="off"><select class="select" id="mediaType"><option value="all">Barcha turlar</option><option value="video">Video</option><option value="image">Rasm</option><option value="other">Boshqa</option></select></div>
-      <div id="galleryStatus" class="status hidden">Galereya yuklanmoqda…</div>
+      <div class="platforms" id="platforms">
+        <button class="platform active" data-platform="all" type="button">
+          <span class="platform-icon">🗂️</span>
+          <span><span class="platform-name">Barchasi</span><br><span class="platform-count" id="count-all">Barcha media</span></span>
+        </button>
+        <button class="platform" data-platform="instagram" type="button">
+          <span class="platform-icon">📸</span>
+          <span><span class="platform-name">Instagram</span><br><span class="platform-count" id="count-instagram">Media</span></span>
+        </button>
+        <button class="platform" data-platform="youtube" type="button">
+          <span class="platform-icon">▶️</span>
+          <span><span class="platform-name">YouTube</span><br><span class="platform-count" id="count-youtube">Media</span></span>
+        </button>
+        <button class="platform" data-platform="tiktok" type="button">
+          <span class="platform-icon">🎵</span>
+          <span><span class="platform-name">TikTok</span><br><span class="platform-count" id="count-tiktok">Media</span></span>
+        </button>
+        <button class="platform" data-platform="other" type="button">
+          <span class="platform-icon">🌐</span>
+          <span><span class="platform-name">Boshqa</span><br><span class="platform-count" id="count-other">Media</span></span>
+        </button>
+      </div>
+
+      <div class="toolbar" style="margin-top:14px">
+        <input id="gallerySearch" class="search" type="search" placeholder="Fayl nomi yoki foydalanuvchi bo‘yicha qidirish…">
+        <select id="mediaType" class="select">
+          <option value="all">Barcha media</option>
+          <option value="video">Videolar</option>
+          <option value="image">Rasmlar</option>
+        </select>
+      </div>
+
+      <div id="galleryStatus" class="status">Galereya yuklanmoqda…</div>
       <div id="gallery" class="gallery"></div>
     </section>
 
     <section class="section" id="usersSection">
-      <div class="section-head"><div><h2>Foydalanuvchilar</h2><p>Foydalanuvchi tarixini ko‘rish</p></div><button class="btn secondary" id="refreshUsers" type="button">↻ Yangilash</button></div>
-      <input class="search" id="userSearch" type="search" placeholder="Ism, username yoki Telegram ID…" autocomplete="off">
-      <div class="users" id="users" style="margin-top:12px"></div>
+      <div class="section-head">
+        <div>
+          <h2>Foydalanuvchilar</h2>
+          <p>Foydalanuvchini tanlab, yuklamalar tarixini ko‘ring</p>
+        </div>
+        <button class="btn secondary" id="refreshUsers" type="button">↻</button>
+      </div>
+
+      <input id="userSearch" class="search" type="search" placeholder="Ism, username yoki Telegram ID…">
+      <div id="users" class="users" style="margin-top:12px"></div>
     </section>
 
     <section class="section hidden" id="historySection">
-      <div class="section-head"><div><button class="btn secondary back" id="backToUsers" type="button">← Foydalanuvchilarga</button><h2 id="historyTitle">Yuklamalar tarixi</h2><p id="historyMeta"></p></div></div>
-      <div class="downloads" id="downloads"></div>
+      <button class="btn secondary" id="backToUsers" type="button">← Foydalanuvchilarga</button>
+      <div class="section-head" style="margin-top:17px">
+        <div>
+          <h2 id="historyTitle">Foydalanuvchi tarixi</h2>
+          <p id="historyMeta"></p>
+        </div>
+      </div>
+      <div id="downloads" class="downloads"></div>
     </section>
   </section>
+
   <footer class="foot">Savebot • Admin panel</footer>
 </main>
+
 <script>
 (() => {
   'use strict';
-  const tg = window.Telegram && window.Telegram.WebApp;
-  if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor('secondary_bg_color'); tg.setBackgroundColor('#0d1119'); } catch (_) {} }
-  const initData = tg && tg.initData ? tg.initData : '';
-  const headers = {'X-Telegram-Init-Data': initData};
-  const $ = id => document.getElementById(id);
-  let users = [], mediaItems = [], selectedPlatform = 'all', selectedUser = null;
-  const blobUrls = new Set();
-  const platformNames = {all:'Barcha media',instagram:'Instagram',youtube:'YouTube',tiktok:'TikTok',other:'Boshqa'};
 
-  function node(tag, cls, text) { const n=document.createElement(tag); if(cls)n.className=cls; if(text!==undefined)n.textContent=String(text??''); return n; }
-  function first(obj, keys, fallback='') { if(!obj || typeof obj!=='object')return fallback; for(const k of keys)if(obj[k]!==undefined&&obj[k]!==null&&obj[k]!=='')return obj[k]; return fallback; }
-  function fmt(v) { if(v===null||v===undefined||v==='')return '—'; if(typeof v==='number')return v.toLocaleString('uz-UZ'); return String(v); }
-  function userId(u) { return first(u,['user_id','telegram_id','id','tg_id'],''); }
-  function userName(u) { const full=[first(u,['full_name','first_name','firstName','name']),first(u,['last_name','lastName'])].filter(Boolean).join(' ').trim(); const uname=first(u,['username'],''); return full || (uname ? '@'+String(uname).replace(/^@/,'') : (userId(u)?`Foydalanuvchi ${userId(u)}`:'Noma’lum foydalanuvchi')); }
-  function dateText(v) { if(!v)return 'Sana noma’lum'; let d; if(typeof v==='number'||/^\d{10,13}$/.test(String(v))){let x=Number(v);if(String(Math.trunc(x)).length===13)x/=1000;d=new Date(x*1000);}else d=new Date(v); return Number.isNaN(d.getTime())?String(v):d.toLocaleString('uz-UZ',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}); }
-  function setConnection(text, bad=false) { $('connection').textContent=text; $('connectionDot').classList.toggle('bad',bad); }
-  function showFatal(msg) { $('status').className='status error'; $('status').textContent=msg; $('status').classList.remove('hidden'); $('app').classList.add('hidden'); setConnection('Xatolik',true); }
-  async function request(path) {
-    if(!initData)throw new Error('Telegram sessiyasi topilmadi. Mini App’ni bot ichidagi admin tugmasi orqali oching.');
-    const r=await fetch(path,{headers,cache:'no-store'});
-    if(!r.ok){const body=await r.text();let detail=body;try{const j=JSON.parse(body);detail=j.detail||body;}catch(_){}throw new Error(`API xatosi ${r.status}: ${detail||r.statusText}`);}
-    return r;
+  const tg = window.Telegram?.WebApp;
+  if (tg) {
+    tg.ready();
+    tg.expand();
   }
-  function safeSource(url) { return typeof url==='string' && /^https?:\/\//i.test(url) ? url : ''; }
+
+  const $ = id => document.getElementById(id);
+  const blobUrls = new Set();
+
+  let users = [];
+  let mediaItems = [];
+  let selectedPlatform = 'all';
+
+  const platformNames = {
+    all: 'Barchasi',
+    instagram: 'Instagram',
+    youtube: 'YouTube',
+    tiktok: 'TikTok',
+    other: 'Boshqa'
+  };
+
+  function node(tag, className = '', text = '') {
+    const el = document.createElement(tag);
+    if (className) el.className = className;
+    if (text !== undefined && text !== null) el.textContent = String(text);
+    return el;
+  }
+
+  function first(obj, keys, fallback = '') {
+    for (const key of keys) {
+      if (obj && obj[key] !== undefined && obj[key] !== null && obj[key] !== '') {
+        return obj[key];
+      }
+    }
+    return fallback;
+  }
+
+  function fmt(value) {
+    return value === undefined || value === null ? '—' : String(value);
+  }
+
+  function userId(user) {
+    return String(first(user, ['user_id', 'id', 'telegram_id'], ''));
+  }
+
+  function userName(user) {
+    return String(
+      first(user, ['full_name', 'name', 'first_name', 'username'], `ID ${userId(user)}`)
+    );
+  }
+
+  function dateText(value) {
+    if (!value) return 'Sana noma’lum';
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return String(value);
+    return date.toLocaleString('uz-UZ', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  }
+
+  function safeSource(value) {
+    try {
+      const url = new URL(value);
+      return ['http:', 'https:'].includes(url.protocol) ? url.href : '';
+    } catch {
+      return '';
+    }
+  }
+
+  function platformOf(item) {
+    const value = String(item.platform || '').toLowerCase();
+    if (value.includes('instagram')) return 'instagram';
+    if (value.includes('youtube') || value.includes('youtu.be')) return 'youtube';
+    if (value.includes('tiktok')) return 'tiktok';
+    return 'other';
+  }
+
+  function mediaKind(item) {
+    const type = String(first(item, ['media_type', 'type'], '')).toLowerCase();
+    const name = String(first(item, ['original_name', 'file_name', 'name'], '')).toLowerCase();
+
+    if (type.includes('image') || type.includes('photo') || /\.(png|jpe?g|webp|gif|bmp|avif)$/i.test(name)) {
+      return 'image';
+    }
+    return 'video';
+  }
+
+  async function request(path) {
+    const initData = tg?.initData || '';
+
+    const response = await fetch(path, {
+      method: 'GET',
+      headers: {
+        'X-Telegram-Init-Data': initData
+      },
+      cache: 'no-store'
+    });
+
+    if (!response.ok) {
+      let message = `Server xatosi: ${response.status}`;
+      try {
+        const data = await response.json();
+        message = data.detail || data.message || message;
+      } catch {}
+      throw new Error(message);
+    }
+
+    return response;
+  }
+
+  function setConnection(ok, text) {
+    $('connection').textContent = text;
+    $('connectionDot').classList.toggle('bad', !ok);
+  }
 
   async function loadDashboard() {
-    $('refreshUsers').disabled=true; setConnection('Yuklanmoqda…');
+    $('status').classList.remove('hidden');
+    $('status').textContent = 'Admin ma’lumotlari yuklanmoqda…';
+
     try {
-      const r=await request('/api/dashboard'), data=await r.json();
-      $('totalUsers').textContent=fmt(data.total_users); $('totalDownloads').textContent=fmt(data.total_downloads); $('todayActive').textContent=fmt(data.today_active);
-      users=Array.isArray(data.users)?data.users:[]; renderUsers();
-      $('status').classList.add('hidden'); $('app').classList.remove('hidden'); setConnection('Ulangan');
-    } catch(e) { showFatal(e.message||'Admin ma’lumotlarini yuklab bo‘lmadi.'); }
-    finally { $('refreshUsers').disabled=false; }
+      const response = await request('/api/dashboard');
+      const data = await response.json();
+
+      $('totalUsers').textContent = fmt(first(data, ['total_users', 'users_count', 'users'], '0'));
+      $('totalDownloads').textContent = fmt(first(data, ['total_downloads', 'downloads_count', 'downloads'], '0'));
+      $('todayActive').textContent = fmt(first(data, ['today_active_users', 'today_active', 'active_today'], '0'));
+
+      users = Array.isArray(data.users) ? data.users : [];
+
+      if (!users.length) {
+        try {
+          const usersResponse = await request('/api/users');
+          const usersData = await usersResponse.json();
+          users = Array.isArray(usersData) ? usersData : (usersData.users || []);
+        } catch {}
+      }
+
+      renderUsers();
+      $('app').classList.remove('hidden');
+      $('status').classList.add('hidden');
+      setConnection(true, 'Ulandi');
+    } catch (error) {
+      $('status').classList.remove('hidden');
+      $('status').classList.add('error');
+      $('status').textContent = 'Panel ma’lumotlarini yuklab bo‘lmadi.\n' + error.message;
+      setConnection(false, 'Xatolik');
+    }
   }
 
-  function platformOf(item) { const raw=String(first(item,['platform'],'other')).toLowerCase(); if(raw.includes('insta'))return 'instagram'; if(raw.includes('youtube')||raw.includes('youtu'))return 'youtube'; if(raw.includes('tiktok'))return 'tiktok'; return 'other'; }
-  function mediaKind(item) { const raw=String(first(item,['media_type'],'')).toLowerCase(); if(raw.includes('video')||raw.includes('mp4')||raw.includes('mov')||raw.includes('webm'))return 'video'; if(raw.includes('image')||raw.includes('photo')||raw.includes('jpg')||raw.includes('png')||raw.includes('webp'))return 'image'; return 'other'; }
-  async function loadGallery(platform=selectedPlatform) {
-    selectedPlatform=platform; document.querySelectorAll('.platform').forEach(b=>b.classList.toggle('active',b.dataset.platform===platform));
-    $('galleryTitle').textContent=platformNames[platform]||'Media galereyasi'; $('gallerySubtitle').textContent=platform==='all'?'Arxivdagi barcha saqlangan media':`${platformNames[platform]||platform} platformasidan saqlangan media`;
-    $('galleryStatus').className='status'; $('galleryStatus').textContent='Galereya yuklanmoqda…'; $('gallery').replaceChildren(); $('galleryCount').textContent='…'; $('refreshGallery').disabled=true;
+  async function loadGallery(platform = 'all') {
+    selectedPlatform = platform;
+
+    document.querySelectorAll('.platform').forEach(button => {
+      button.classList.toggle('active', button.dataset.platform === platform);
+    });
+
+    $('galleryStatus').classList.remove('hidden', 'error');
+    $('galleryStatus').textContent = 'Media galereyasi yuklanmoqda…';
+    $('gallery').replaceChildren();
+
     try {
-      const r=await request(`/api/gallery?platform=${encodeURIComponent(platform)}`), data=await r.json();
-      mediaItems=Array.isArray(data.media)?data.media:[];
-      $('galleryCount').textContent=`${fmt(data.count ?? mediaItems.length)} ta`;
-      $('count-all').textContent=`${fmt(mediaItems.length)} ta media`;
-      // Counts for each platform are filled from the all-media response when available.
-      if(platform==='all'){
-        for(const p of ['instagram','youtube','tiktok','other']){const c=mediaItems.filter(x=>platformOf(x)===p).length;const label=$(p==='other'?'count-other':`count-${p}`);if(label)label.textContent=`${fmt(c)} ta media`;}
-      }
-      $('galleryStatus').classList.add('hidden'); renderGallery();
-    } catch(e) { mediaItems=[]; $('galleryCount').textContent='—'; $('galleryStatus').className='status error'; $('galleryStatus').textContent=e.message||'Galereyani yuklashda xatolik.'; }
-    finally { $('refreshGallery').disabled=false; }
+      const response = await request(`/api/gallery?platform=${encodeURIComponent(platform)}`);
+      const data = await response.json();
+
+      mediaItems = Array.isArray(data.media) ? data.media : [];
+      $('galleryStatus').classList.add('hidden');
+
+      renderGallery();
+      updatePlatformCounts();
+    } catch (error) {
+      $('galleryStatus').classList.remove('hidden');
+      $('galleryStatus').classList.add('error');
+      $('galleryStatus').textContent = 'Galereyani yuklab bo‘lmadi.\n' + error.message;
+    }
   }
-  function revokeOldUrls(card) { card.querySelectorAll('video').forEach(v=>{try{v.pause();}catch(_){} if(v.dataset.objectUrl){URL.revokeObjectURL(v.dataset.objectUrl);blobUrls.delete(v.dataset.objectUrl);}}); }
+
+  async function updatePlatformCounts() {
+    const platforms = ['all', 'instagram', 'youtube', 'tiktok', 'other'];
+
+    for (const platform of platforms) {
+      try {
+        let items = mediaItems;
+
+        if (platform !== selectedPlatform) {
+          const response = await request(`/api/gallery?platform=${encodeURIComponent(platform)}`);
+          const data = await response.json();
+          items = Array.isArray(data.media) ? data.media : [];
+        }
+
+        const countEl = $(`count-${platform}`);
+        if (countEl) countEl.textContent = `${items.length} ta media`;
+      } catch {
+        const countEl = $(`count-${platform}`);
+        if (countEl && !countEl.textContent) countEl.textContent = 'Media';
+      }
+    }
+  }
+
   function renderGallery() {
-    const query=$('gallerySearch').value.trim().toLocaleLowerCase(), type=$('mediaType').value;
-    const filtered=mediaItems.filter(item=>{
-      const text=[item.original_name,item.username,item.full_name,item.user_id,item.platform,item.source_url,item.download_id].join(' ').toLocaleLowerCase();
-      return (!query||text.includes(query))&&(type==='all'||mediaKind(item)===type);
+    const query = $('gallerySearch').value.trim().toLocaleLowerCase();
+    const typeFilter = $('mediaType').value;
+
+    const filtered = mediaItems.filter(item => {
+      const searchable = [
+        first(item, ['original_name'], ''),
+        first(item, ['username'], ''),
+        first(item, ['full_name'], ''),
+        first(item, ['user_id'], ''),
+        first(item, ['download_id'], ''),
+        first(item, ['platform'], '')
+      ].join(' ').toLocaleLowerCase();
+
+      if (query && !searchable.includes(query)) return false;
+      if (typeFilter !== 'all' && mediaKind(item) !== typeFilter) return false;
+      return true;
     });
-    const container=$('gallery'); container.replaceChildren();
-    if(!filtered.length){container.append(node('div','empty',mediaItems.length?'Filtr bo‘yicha media topilmadi.':'Bu bo‘limda saqlangan media topilmadi.'));return;}
-    filtered.forEach(item=>{
-      const card=node('article','media-card'), preview=node('div','preview');
-      const available=item.available!==false && item.asset_id!==undefined && item.asset_id!==null;
-      if(available && mediaKind(item)==='video'){
-        const placeholder=node('div','preview-placeholder'); placeholder.append(node('div','play-symbol','▶'),node('div','','Videoni ochish uchun bosing')); preview.append(placeholder);
-        placeholder.style.cursor='pointer'; placeholder.addEventListener('click',()=>playInline(item,preview,placeholder));
-      } else if(available && mediaKind(item)==='image'){
-        const placeholder=node('div','preview-placeholder');placeholder.append(node('div','play-symbol','▧'),node('div','','Rasm fayli'));preview.append(placeholder);
-        placeholder.style.cursor='pointer';placeholder.addEventListener('click',()=>playInline(item,preview,placeholder));
+
+    const container = $('gallery');
+    container.replaceChildren();
+
+    if (!filtered.length) {
+      container.append(node(
+        'div',
+        'empty',
+        mediaItems.length
+          ? 'Filtr bo‘yicha media topilmadi.'
+          : 'Bu bo‘limda saqlangan media topilmadi.'
+      ));
+      return;
+    }
+
+    filtered.forEach(item => {
+      const card = node('article', 'media-card');
+      const preview = node('div', 'preview');
+      const available = item.available !== false && item.asset_id !== undefined && item.asset_id !== null;
+
+      if (available) {
+        const placeholder = node(
+          'div',
+          'preview-placeholder',
+          mediaKind(item) === 'image' ? 'Rasmni ochish uchun bosing' : 'Videoni ko‘rish uchun bosing'
+        );
+        placeholder.append(node('div', 'play-symbol', mediaKind(item) === 'image' ? '▧' : '▶'));
+        preview.append(placeholder);
+        placeholder.addEventListener('click', () => playInline(item, preview, placeholder));
       } else {
-        const ph=node('div','preview-placeholder'); ph.append(node('div','play-symbol',available?'▶':'!'),node('div',available?'':'unavailable',available?'Media faylini ochish':'Fayl mavjud emas')); preview.append(ph);
+        preview.append(node('div', 'preview-placeholder unavailable', 'Fayl mavjud emas'));
       }
-      const info=node('div','media-info'); info.append(node('div','tag',platformNames[platformOf(item)]||String(item.platform||'Boshqa')));
-      info.append(node('div','media-title',first(item,['original_name'],'Nomsiz fayl')));
-      const who=first(item,['full_name'],'') || (item.username?('@'+String(item.username).replace(/^@/,'')):`ID ${fmt(item.user_id)}`);
-      info.append(node('div','media-meta',`👤 ${who}`));
-      info.append(node('div','media-meta',`🕒 ${dateText(item.timestamp)} · Yuklama #${fmt(item.download_id)}`));
-      const actions=node('div','media-actions');
-      if(available){const open=node('button','btn','▶ Ko‘rish');open.type='button';open.addEventListener('click',()=>playInline(item,preview,preview.querySelector('.preview-placeholder')));actions.append(open);}
-      const source=safeSource(item.source_url); if(source){const link=node('a','btn secondary','↗ Manba');link.href=source;link.target='_blank';link.rel='noopener noreferrer';actions.append(link);}
-      info.append(actions);card.append(preview,info);container.append(card);
+
+      const info = node('div', 'media-info');
+      info.append(node('div', 'tag', platformNames[platformOf(item)] || String(item.platform || 'Boshqa')));
+      info.append(node('div', 'media-title', first(item, ['original_name'], 'Nomsiz fayl')));
+
+      const who = first(item, ['full_name'], '') ||
+        (item.username ? '@' + String(item.username).replace(/^@/, '') : `ID ${fmt(item.user_id)}`);
+
+      info.append(node('div', 'media-meta', `👤 ${who}`));
+      info.append(node('div', 'media-meta', `🕒 ${dateText(item.timestamp)} · Yuklama #${fmt(item.download_id)}`));
+
+      const actions = node('div', 'media-actions');
+
+      if (available) {
+        const openButton = node('button', 'btn', mediaKind(item) === 'image' ? '▧ Ko‘rish' : '▶ Ko‘rish');
+        openButton.type = 'button';
+        openButton.addEventListener('click', () => playInline(item, preview, preview.querySelector('.preview-placeholder')));
+        actions.append(openButton);
+      }
+
+      const source = safeSource(item.source_url);
+      if (source) {
+        const link = node('a', 'btn secondary', '↗ Manba');
+        link.href = source;
+        link.target = '_blank';
+        link.rel = 'noopener noreferrer';
+        actions.append(link);
+      }
+
+      info.append(actions);
+      card.append(preview, info);
+      container.append(card);
     });
   }
+
   async function playInline(item, preview, placeholder) {
-    if(preview.querySelector('video')){const existing=preview.querySelector('video');existing.play().catch(()=>{});return;}
-    if(!item.asset_id){alert('Media ID topilmadi.');return;}
-    if(placeholder){placeholder.textContent='Video yuklanmoqda…';placeholder.style.cursor='default';}
+    const existing = preview.querySelector('video');
+    if (existing) {
+      existing.play().catch(() => {});
+      return;
+    }
+
+    if (preview.querySelector('img')) return;
+
+    if (!item.asset_id) {
+      alert('Media ID topilmadi.');
+      return;
+    }
+
+    if (placeholder) {
+      placeholder.textContent = 'Media yuklanmoqda…';
+      placeholder.style.cursor = 'default';
+    }
+
     try {
-      const r=await request(`/api/media/${encodeURIComponent(item.asset_id)}`), blob=await r.blob();
-      if(!blob.size)throw new Error('Media fayli bo‘sh.');
-      const url=URL.createObjectURL(blob);blobUrls.add(url);
-      if(mediaKind(item)==='image'){
-        const img=node('img');img.src=url;img.alt=String(item.original_name||'Saqlangan rasm');img.style.cssText='width:100%;height:100%;object-fit:contain;background:#05070a';img.onload=()=>{};preview.replaceChildren(img);return;
+      const response = await request(`/api/media/${encodeURIComponent(item.asset_id)}`);
+      const blob = await response.blob();
+
+      if (!blob.size) throw new Error('Media fayli bo‘sh.');
+
+      const url = URL.createObjectURL(blob);
+      blobUrls.add(url);
+
+      if (mediaKind(item) === 'image') {
+        const img = node('img');
+        img.src = url;
+        img.alt = String(item.original_name || 'Saqlangan rasm');
+        preview.replaceChildren(img);
+        return;
       }
-      const video=node('video');video.controls=true;video.playsInline=true;video.preload='metadata';video.src=url;video.dataset.objectUrl=url;
-      video.addEventListener('error',()=>{const msg=node('div','preview-placeholder unavailable','Videoni ijro qilib bo‘lmadi. Fayl formati yoki arxivni tekshiring.');preview.replaceChildren(msg);});
-      preview.replaceChildren(video); video.play().catch(()=>{});
-    } catch(e) {
-      if(placeholder){placeholder.className='preview-placeholder unavailable';placeholder.textContent=e.message||'Media ochilmadi.';placeholder.style.cursor='pointer';placeholder.addEventListener('click',()=>playInline(item,preview,placeholder),{once:true});}
-      else alert(e.message||'Media ochilmadi.');
+
+      const video = node('video');
+      video.controls = true;
+      video.playsInline = true;
+      video.preload = 'metadata';
+      video.src = url;
+
+      video.addEventListener('error', () => {
+        preview.replaceChildren(node('div', 'preview-placeholder unavailable', 'Videoni ijro qilib bo‘lmadi. Arxiv yoki fayl formatini tekshiring.'));
+      });
+
+      preview.replaceChildren(video);
+      video.play().catch(() => {});
+    } catch (error) {
+      const message = error.message || 'Media ochilmadi.';
+      if (placeholder) {
+        placeholder.className = 'preview-placeholder unavailable';
+        placeholder.textContent = message;
+        placeholder.style.cursor = 'pointer';
+        placeholder.addEventListener('click', () => playInline(item, preview, placeholder), { once: true });
+      } else {
+        alert(message);
+      }
     }
   }
 
   function renderUsers() {
-    const q=$('userSearch').value.trim().toLocaleLowerCase();const filtered=users.filter(u=>`${userName(u)} ${userId(u)} ${first(u,['username'],'')}`.toLocaleLowerCase().includes(q));
-    const container=$('users');container.replaceChildren();
-    if(!filtered.length){container.append(node('div','empty',q?'Qidiruv bo‘yicha foydalanuvchi topilmadi.':'Foydalanuvchilar ro‘yxati bo‘sh.'));return;}
-    filtered.forEach(u=>{
-      const card=node('article','user'), name=userName(u), avatar=node('div','avatar',name.trim().slice(0,1).toUpperCase()||'U'), info=node('div','user-info');
-      info.append(node('div','user-name',name));const username=first(u,['username'],'');info.append(node('div','user-meta',`${username?'@'+String(username).replace(/^@/,'')+' · ':''}ID: ${fmt(userId(u))}`));
-      const count=first(u,['download_count','downloads_count','total_downloads','downloads'],null);if(count!==null&&typeof count!=='object')info.append(node('div','user-meta',`Yuklamalar: ${fmt(count)}`));
-      const last=first(u,['last_download'],'');if(last)info.append(node('div','user-meta',`Oxirgi yuklama: ${dateText(last)}`));
-      const btn=node('button','btn','Tarix');btn.type='button';btn.addEventListener('click',()=>openHistory(u));card.append(avatar,info,btn);container.append(card);
+    const query = $('userSearch').value.trim().toLocaleLowerCase();
+
+    const filtered = users.filter(user => {
+      const searchable = `${userName(user)} ${userId(user)} ${first(user, ['username'], '')}`.toLocaleLowerCase();
+      return searchable.includes(query);
+    });
+
+    const container = $('users');
+    container.replaceChildren();
+
+    if (!filtered.length) {
+      container.append(node('div', 'empty', query ? 'Qidiruv bo‘yicha foydalanuvchi topilmadi.' : 'Foydalanuvchilar ro‘yxati bo‘sh.'));
+      return;
+    }
+
+    filtered.forEach(user => {
+      const card = node('article', 'user');
+      const name = userName(user);
+      const avatar = node('div', 'avatar', name.trim().slice(0, 1).toUpperCase() || 'U');
+      const info = node('div', 'user-info');
+
+      info.append(node('div', 'user-name', name));
+
+      const username = first(user, ['username'], '');
+      info.append(node('div', 'user-meta', `${username ? '@' + String(username).replace(/^@/, '') + ' · ' : ''}ID: ${fmt(userId(user))}`));
+
+      const count = first(user, ['download_count', 'downloads_count', 'total_downloads', 'downloads'], null);
+      if (count !== null && typeof count !== 'object') {
+        info.append(node('div', 'user-meta', `Yuklamalar: ${fmt(count)}`));
+      }
+
+      const last = first(user, ['last_download'], '');
+      if (last) info.append(node('div', 'user-meta', `Oxirgi yuklama: ${dateText(last)}`));
+
+      const button = node('button', 'btn', 'Tarix');
+      button.type = 'button';
+      button.addEventListener('click', () => openHistory(user));
+
+      card.append(avatar, info, button);
+      container.append(card);
     });
   }
-  async function openHistory(user) {
-    const id=userId(user);if(id===''){alert('Foydalanuvchi ID raqami topilmadi.');return;}selectedUser=user;
-    $('usersSection').classList.add('hidden');$('historySection').classList.remove('hidden');$('historyTitle').textContent=userName(user);$('historyMeta').textContent=`Telegram ID: ${id}`;
-    const container=$('downloads');container.replaceChildren(node('div','status','Yuklamalar tarixi yuklanmoqda…'));
+
+  async function loadHistoryAsset(asset, preview) {
+    if (preview.dataset.loading === '1') return;
+
+    if (preview.querySelector('video') || preview.querySelector('img')) return;
+
+    preview.dataset.loading = '1';
+    preview.replaceChildren(node('div', 'preview-placeholder', 'Media yuklanmoqda…'));
+
     try {
-      const r=await request(`/api/users/${encodeURIComponent(id)}/downloads`),data=await r.json(),rows=Array.isArray(data.downloads)?data.downloads:[];container.replaceChildren();
-      if(!rows.length){container.append(node('div','empty','Bu foydalanuvchining yuklamalari topilmadi.'));return;}
-      rows.forEach(item=>{
-        const card=node('article','download');card.append(node('div','download-title',first(item,['title','original_name','filename','file_name','source_url','url'],'Media fayl')));
-        const platform=first(item,['platform'],'');const date=first(item,['timestamp','downloaded_at','created_at','date'],'');card.append(node('div','download-meta',[platform,date?dateText(date):'',item.id!==undefined?`ID: ${item.id}`:''].filter(Boolean).join(' · ')||'Yuklama ma’lumoti'));
-        const actions=node('div','actions');const media=Array.isArray(item.media)?item.media:[];
-        media.forEach(asset=>{if(asset.available&&asset.id!==undefined){const b=node('button','btn','▶ Media ko‘rish');b.type='button';b.addEventListener('click',async()=>{try{const res=await request(`/api/media/${encodeURIComponent(asset.id)}`),blob=await res.blob(),url=URL.createObjectURL(blob);blobUrls.add(url);const win=window.open(url,'_blank');if(!win){const a=node('a');a.href=url;a.download=asset.name||'media';a.click();}}catch(e){alert(e.message||'Media ochilmadi.');}});actions.append(b);}});
-        const src=safeSource(first(item,['source_url','url','original_url'],''));if(src){const a=node('a','btn secondary','↗ Manba');a.href=src;a.target='_blank';a.rel='noopener noreferrer';actions.append(a);}if(actions.childElementCount)card.append(actions);container.append(card);
-      });
-    } catch(e){container.replaceChildren(node('div','status error',e.message||'Tarixni yuklashda xatolik.'));}
-    $('historySection').scrollIntoView({behavior:'smooth',block:'start'});
+      const response = await request(`/api/media/${encodeURIComponent(asset.id)}`);
+      const blob = await response.blob();
+
+      if (!blob.size) throw new Error('Media fayli bo‘sh.');
+
+      const url = URL.createObjectURL(blob);
+      blobUrls.add(url);
+      preview.replaceChildren();
+
+      const type = String(asset.type || '').toLowerCase();
+      const name = String(asset.name || '');
+
+      if (type.includes('image') || type.includes('photo') || /\.(png|jpe?g|webp|gif|bmp|avif)$/i.test(name)) {
+        const img = node('img');
+        img.src = url;
+        img.alt = name || 'Saqlangan rasm';
+        preview.append(img);
+      } else {
+        const video = node('video');
+        video.controls = true;
+        video.playsInline = true;
+        video.preload = 'metadata';
+        video.src = url;
+
+        video.addEventListener('error', () => {
+          preview.replaceChildren(node('div', 'preview-placeholder unavailable', 'Videoni ijro qilib bo‘lmadi.'));
+        });
+
+        preview.append(video);
+        video.play().catch(() => {});
+      }
+    } catch (error) {
+      preview.replaceChildren(node('div', 'preview-placeholder unavailable', error.message || 'Media ochilmadi.'));
+      preview.dataset.loading = '0';
+    }
   }
 
-  document.querySelectorAll('.platform').forEach(b=>b.addEventListener('click',()=>loadGallery(b.dataset.platform)));
-  $('refreshGallery').addEventListener('click',()=>loadGallery(selectedPlatform));$('gallerySearch').addEventListener('input',renderGallery);$('mediaType').addEventListener('change',renderGallery);
-  $('userSearch').addEventListener('input',renderUsers);$('refreshUsers').addEventListener('click',loadDashboard);
-  $('backToUsers').addEventListener('click',()=>{$('historySection').classList.add('hidden');$('usersSection').classList.remove('hidden');$('usersSection').scrollIntoView({behavior:'smooth',block:'start'});});
-  loadDashboard();loadGallery('all');
+  async function openHistory(user) {
+    const id = userId(user);
+
+    if (!id) {
+      alert('Foydalanuvchi ID raqami topilmadi.');
+      return;
+    }
+
+    $('usersSection').classList.add('hidden');
+    $('historySection').classList.remove('hidden');
+    $('historyTitle').textContent = userName(user);
+    $('historyMeta').textContent = `Telegram ID: ${id}`;
+
+    const container = $('downloads');
+    container.replaceChildren(node('div', 'status', 'Yuklamalar tarixi yuklanmoqda…'));
+
+    try {
+      const response = await request(`/api/users/${encodeURIComponent(id)}/downloads`);
+      const data = await response.json();
+      const rows = Array.isArray(data.downloads) ? data.downloads : [];
+
+      container.replaceChildren();
+
+      if (!rows.length) {
+        container.append(node('div', 'empty', 'Bu foydalanuvchining yuklamalari topilmadi.'));
+        return;
+      }
+
+      rows.forEach(item => {
+        const card = node('article', 'download');
+
+        card.append(node(
+          'div',
+          'download-title',
+          first(item, ['title', 'original_name', 'filename', 'file_name', 'source_url', 'url'], 'Media fayl')
+        ));
+
+        const platform = first(item, ['platform'], '');
+        const date = first(item, ['timestamp', 'downloaded_at', 'created_at', 'date'], '');
+
+        card.append(node(
+          'div',
+          'download-meta',
+          [platform, date ? dateText(date) : '', item.id !== undefined ? `ID: ${item.id}` : '']
+            .filter(Boolean).join(' · ') || 'Yuklama ma’lumoti'
+        ));
+
+        const media = Array.isArray(item.media) ? item.media : [];
+
+        if (media.length) {
+          const grid = node('div', 'history-media-grid');
+
+          media.forEach(asset => {
+            const tile = node('div', 'history-media');
+            const preview = node('div', 'history-media-preview');
+
+            if (asset.available && asset.id !== undefined && asset.id !== null) {
+              const isImage = String(asset.type || '').toLowerCase().includes('image') ||
+                /\.(png|jpe?g|webp|gif|bmp|avif)$/i.test(asset.name || '');
+
+              preview.append(
+                node('div', 'play-symbol', isImage ? '▧' : '▶'),
+                node('div', '', isImage ? 'Rasmni ko‘rish' : 'Videoni ko‘rish')
+              );
+
+              preview.addEventListener('click', () => loadHistoryAsset(asset, preview));
+            } else {
+              preview.style.cursor = 'default';
+              preview.append(node('div', 'unavailable', 'Fayl mavjud emas'));
+            }
+
+            tile.append(
+              preview,
+              node('div', 'history-media-name', asset.name || 'Media fayl')
+            );
+
+            grid.append(tile);
+          });
+
+          card.append(grid);
+        }
+
+        const actions = node('div', 'actions');
+        const source = safeSource(first(item, ['source_url', 'url', 'original_url'], ''));
+
+        if (source) {
+          const link = node('a', 'btn secondary', '↗ Manba');
+          link.href = source;
+          link.target = '_blank';
+          link.rel = 'noopener noreferrer';
+          actions.append(link);
+        }
+
+        if (actions.childElementCount) card.append(actions);
+        container.append(card);
+      });
+    } catch (error) {
+      container.replaceChildren(node('div', 'status error', error.message || 'Tarixni yuklashda xatolik.'));
+    }
+
+    $('historySection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
+  document.querySelectorAll('.platform').forEach(button => {
+    button.addEventListener('click', () => loadGallery(button.dataset.platform));
+  });
+
+  $('refreshGallery').addEventListener('click', () => loadGallery(selectedPlatform));
+  $('gallerySearch').addEventListener('input', renderGallery);
+  $('mediaType').addEventListener('change', renderGallery);
+  $('userSearch').addEventListener('input', renderUsers);
+  $('refreshUsers').addEventListener('click', loadDashboard);
+
+  $('backToUsers').addEventListener('click', () => {
+    $('historySection').classList.add('hidden');
+    $('usersSection').classList.remove('hidden');
+    $('usersSection').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
+
+  loadDashboard();
+  loadGallery('all');
 })();
 </script>
 </body>
