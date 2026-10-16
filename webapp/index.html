@@ -1,69 +1,607 @@
+<!DOCTYPE html>
+<html lang="uz">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <meta name="theme-color" content="#10131b">
+  <title>Savebot — Admin</title>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-def verify_webapp_init_data(init_data: str) -> dict:
-    """Validate Telegram Mini App initData and return its signed user object."""
-    if not BOT_TOKEN or not init_data:
-        raise HTTPException(
-            status_code=401,
-            detail="Telegram session is missing",
-        )
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: var(--tg-theme-bg-color, #10131b);
+      --panel: var(--tg-theme-secondary-bg-color, #191e2a);
+      --text: var(--tg-theme-text-color, #f4f6fb);
+      --muted: var(--tg-theme-hint-color, #9ba6b8);
+      --accent: var(--tg-theme-button-color, #6c63ff);
+      --line: rgba(150,165,190,.18);
+      --danger: #ff647c;
+    }
 
-    fields = dict(parse_qsl(init_data, keep_blank_values=True))
-    received_hash = fields.pop("hash", "")
+    * { box-sizing: border-box; }
 
-    if not received_hash:
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid Telegram session",
-        )
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
 
-    check_string = "\n".join(
-        f"{key}={value}" for key, value in sorted(fields.items())
-    )
+    button, input { font: inherit; }
+    button { cursor: pointer; }
 
-    # Telegram Web App HMAC validation
-    secret_key = hmac.new(
-        b"WebAppData",
-        BOT_TOKEN.encode(),
-        hashlib.sha256,
-    ).digest()
+    .wrap {
+      max-width: 900px;
+      margin: auto;
+      padding: 18px 14px 36px;
+    }
 
-    expected_hash = hmac.new(
-        secret_key,
-        check_string.encode(),
-        hashlib.sha256,
-    ).hexdigest()
+    .top, .brand, .section-head, .user, .actions {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
 
-    if not hmac.compare_digest(expected_hash, received_hash):
-        raise HTTPException(
-            status_code=401,
-            detail="Telegram session verification failed",
-        )
+    .top, .section-head {
+      justify-content: space-between;
+    }
 
-    try:
-        auth_date = int(fields["auth_date"])
-        user = json.loads(fields["user"])
-    except (KeyError, ValueError, json.JSONDecodeError):
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid Telegram session data",
-        )
+    .top { margin-bottom: 18px; }
 
-    if auth_date > time.time() + 60 or time.time() - auth_date > 24 * 60 * 60:
-        raise HTTPException(
-            status_code=401,
-            detail="Telegram session expired; reopen the Mini App",
-        )
+    .brand { gap: 11px; }
 
-    if not isinstance(user, dict) or not isinstance(user.get("id"), int):
-        raise HTTPException(
-            status_code=401,
-            detail="Invalid Telegram user",
-        )
+    .logo {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      border-radius: 14px;
+      background: var(--accent);
+      font-size: 20px;
+      font-weight: 800;
+    }
 
-    if user["id"] not in ADMIN_IDS:
-        raise HTTPException(
-            status_code=403,
-            detail="Admin access only",
-        )
+    .title {
+      font-size: 20px;
+      font-weight: 800;
+    }
 
-    return user
+    .subtitle, .user-meta, .download-meta, .foot {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .pill {
+      border: 1px solid var(--line);
+      padding: 6px 9px;
+      border-radius: 20px;
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 10px;
+      margin-bottom: 20px;
+    }
+
+    .stat, .panel, .user, .download {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: 16px;
+    }
+
+    .stat { padding: 14px 12px; }
+
+    .stat .label {
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .stat .num {
+      margin-top: 5px;
+      font-size: 25px;
+      font-weight: 800;
+      overflow-wrap: anywhere;
+    }
+
+    .section-head { margin: 18px 0 12px; }
+    .section-head h2 { margin: 0; font-size: 17px; }
+
+    .search {
+      width: 100%;
+      padding: 12px 13px;
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      outline: none;
+      background: var(--panel);
+      color: var(--text);
+    }
+
+    .search:focus { border-color: var(--accent); }
+
+    .users, .downloads { display: grid; gap: 10px; }
+
+    .user {
+      padding: 13px;
+      min-width: 0;
+    }
+
+    .avatar {
+      display: grid;
+      place-items: center;
+      flex: 0 0 42px;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      background: rgba(108,99,255,.2);
+      font-weight: 800;
+    }
+
+    .user-info { flex: 1; min-width: 0; }
+    .user-name, .download-title { font-weight: 700; overflow-wrap: anywhere; }
+    .user-meta { overflow-wrap: anywhere; }
+
+    .btn {
+      padding: 10px 12px;
+      border: 0;
+      border-radius: 11px;
+      background: var(--accent);
+      color: white;
+      font-weight: 700;
+      text-decoration: none;
+      text-align: center;
+    }
+
+    .btn.secondary {
+      border: 1px solid var(--line);
+      background: transparent;
+      color: var(--text);
+    }
+
+    .btn:disabled { opacity: .55; cursor: wait; }
+
+    .empty, .status {
+      padding: 20px 14px;
+      border: 1px dashed var(--line);
+      border-radius: 14px;
+      background: var(--panel);
+      color: var(--muted);
+      text-align: center;
+      overflow-wrap: anywhere;
+    }
+
+    .status.error { color: var(--danger); white-space: pre-wrap; }
+
+    .download { padding: 13px; min-width: 0; }
+    .download-meta { margin: 4px 0 10px; overflow-wrap: anywhere; }
+    .actions { flex-wrap: wrap; gap: 8px; }
+    .hidden { display: none !important; }
+    .back { margin-bottom: 12px; }
+    .foot { margin-top: 24px; text-align: center; }
+
+    @media (max-width: 420px) {
+      .stats { gap: 7px; }
+      .stat { padding: 11px 9px; }
+      .stat .num { font-size: 21px; }
+      .user { padding: 10px; gap: 8px; }
+      .user .btn { padding: 9px; font-size: 12px; }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+    <header class="top">
+      <div class="brand">
+        <div class="logo">S</div>
+        <div>
+          <div class="title">Savebot Admin</div>
+          <div class="subtitle">Yuklamalar va foydalanuvchilar</div>
+        </div>
+      </div>
+      <div class="pill" id="connection">Ulanmoqda…</div>
+    </header>
+
+    <div id="status" class="status">Admin ma’lumotlari yuklanmoqda…</div>
+
+    <section id="dashboard" class="hidden">
+      <div class="stats">
+        <div class="stat">
+          <div class="label">Jami foydalanuvchilar</div>
+          <div class="num" id="totalUsers">—</div>
+        </div>
+        <div class="stat">
+          <div class="label">Jami yuklamalar</div>
+          <div class="num" id="totalDownloads">—</div>
+        </div>
+        <div class="stat">
+          <div class="label">Bugun faol</div>
+          <div class="num" id="todayActive">—</div>
+        </div>
+      </div>
+
+      <div id="userSection">
+        <div class="section-head">
+          <h2>Foydalanuvchilar</h2>
+          <button class="btn secondary" id="refresh">Yangilash</button>
+        </div>
+
+        <input
+          class="search"
+          id="search"
+          type="search"
+          placeholder="Ism yoki Telegram ID bo‘yicha qidirish…"
+          autocomplete="off"
+        >
+
+        <div class="users" id="users" style="margin-top:12px"></div>
+      </div>
+
+      <div id="historySection" class="hidden">
+        <div class="section-head">
+          <div>
+            <button class="btn secondary back" id="back">← Orqaga</button>
+            <h2 id="historyTitle">Yuklamalar tarixi</h2>
+            <div id="historyMeta" class="subtitle"></div>
+          </div>
+        </div>
+        <div class="downloads" id="downloads"></div>
+      </div>
+    </section>
+
+    <footer class="foot">Savebot • Admin panel</footer>
+  </main>
+
+  <script>
+  (() => {
+    'use strict';
+
+    const tg = window.Telegram && window.Telegram.WebApp;
+
+    if (tg) {
+      tg.ready();
+      tg.expand();
+    }
+
+    const initData = tg && tg.initData ? tg.initData : '';
+    const headers = { 'X-Telegram-Init-Data': initData };
+
+    const el = id => document.getElementById(id);
+    let allUsers = [];
+
+    function showError(message) {
+      el('status').className = 'status error';
+      el('status').textContent = message;
+      el('status').classList.remove('hidden');
+      el('dashboard').classList.add('hidden');
+      el('connection').textContent = 'Xatolik';
+    }
+
+    async function request(path) {
+      if (!initData) {
+        throw new Error(
+          'Telegram sessiyasi topilmadi. Mini App’ni bot ichidagi tugma orqali oching. Oddiy brauzerda ochmang.'
+        );
+      }
+
+      const response = await fetch(path, {
+        method: 'GET',
+        headers,
+        cache: 'no-store'
+      });
+
+      if (!response.ok) {
+        const body = await response.text();
+        let detail = body;
+
+        try {
+          const parsed = JSON.parse(body);
+          detail = parsed.detail || body;
+        } catch (_) {}
+
+        throw new Error(
+          `API xatosi: ${response.status} — ${detail || response.statusText}`
+        );
+      }
+
+      return response;
+    }
+
+    function first(obj, keys, fallback = '') {
+      if (!obj || typeof obj !== 'object') return fallback;
+
+      for (const key of keys) {
+        if (obj[key] !== undefined && obj[key] !== null && obj[key] !== '') {
+          return obj[key];
+        }
+      }
+
+      return fallback;
+    }
+
+    function fmt(value) {
+      if (value === null || value === undefined || value === '') return '—';
+      if (typeof value === 'number') return value.toLocaleString('uz-UZ');
+      return String(value);
+    }
+
+    function make(tag, className, text) {
+      const node = document.createElement(tag);
+
+      if (className) node.className = className;
+      if (text !== undefined) node.textContent = String(text ?? '');
+
+      return node;
+    }
+
+    function userId(user) {
+      return first(user, ['user_id', 'telegram_id', 'id', 'tg_id'], '');
+    }
+
+    function userName(user) {
+      const firstName = first(
+        user,
+        ['first_name', 'firstName', 'name', 'username']
+      );
+
+      const lastName = first(user, ['last_name', 'lastName']);
+
+      const fullName = [firstName, lastName].filter(Boolean).join(' ');
+
+      return fullName ||
+        (userId(user) ? `Foydalanuvchi ${userId(user)}` : 'Noma’lum foydalanuvchi');
+    }
+
+    function renderUsers() {
+      const query = el('search').value.trim().toLocaleLowerCase();
+
+      const filtered = allUsers.filter(user => {
+        const searchable = [
+          userName(user),
+          userId(user),
+          first(user, ['username'], '')
+        ].join(' ').toLocaleLowerCase();
+
+        return searchable.includes(query);
+      });
+
+      const container = el('users');
+      container.replaceChildren();
+
+      if (!filtered.length) {
+        container.append(
+          make(
+            'div',
+            'empty',
+            query
+              ? 'Qidiruv bo‘yicha foydalanuvchi topilmadi.'
+              : 'Foydalanuvchilar ro‘yxati bo‘sh.'
+          )
+        );
+        return;
+      }
+
+      filtered.forEach(user => {
+        const card = make('article', 'user');
+
+        const avatar = make(
+          'div',
+          'avatar',
+          userName(user).trim().slice(0, 1).toUpperCase() || 'U'
+        );
+
+        const info = make('div', 'user-info');
+
+        info.append(make('div', 'user-name', userName(user)));
+
+        const username = first(user, ['username'], '');
+        const usernameText = username
+          ? '@' + String(username).replace(/^@/, '') + ' · '
+          : '';
+
+        info.append(
+          make('div', 'user-meta', `${usernameText}ID: ${fmt(userId(user))}`)
+        );
+
+        const count = first(
+          user,
+          ['downloads_count', 'download_count', 'total_downloads', 'downloads'],
+          null
+        );
+
+        if (count !== null && typeof count !== 'object') {
+          info.append(make('div', 'user-meta', `Yuklamalar: ${fmt(count)}`));
+        }
+
+        const button = make('button', 'btn', 'Tarix');
+        button.type = 'button';
+        button.addEventListener('click', () => openHistory(user));
+
+        card.append(avatar, info, button);
+        container.append(card);
+      });
+    }
+
+    async function loadDashboard() {
+      el('refresh').disabled = true;
+      el('connection').textContent = 'Yuklanmoqda…';
+      el('status').className = 'status';
+      el('status').textContent = 'Admin ma’lumotlari yuklanmoqda…';
+      el('status').classList.remove('hidden');
+
+      try {
+        const response = await request('/api/dashboard');
+        const data = await response.json();
+
+        el('totalUsers').textContent = fmt(data.total_users);
+        el('totalDownloads').textContent = fmt(data.total_downloads);
+        el('todayActive').textContent = fmt(data.today_active);
+
+        allUsers = Array.isArray(data.users) ? data.users : [];
+
+        renderUsers();
+
+        el('status').classList.add('hidden');
+        el('dashboard').classList.remove('hidden');
+        el('userSection').classList.remove('hidden');
+        el('historySection').classList.add('hidden');
+        el('connection').textContent = 'Ulangan';
+      } catch (error) {
+        showError(
+          error && error.message
+            ? error.message
+            : 'Noma’lum xatolik yuz berdi.'
+        );
+      } finally {
+        el('refresh').disabled = false;
+      }
+    }
+
+    async function openHistory(user) {
+      const id = userId(user);
+
+      if (id === '') {
+        showError('Bu foydalanuvchining ID raqami topilmadi.');
+        return;
+      }
+
+      el('userSection').classList.add('hidden');
+      el('historySection').classList.remove('hidden');
+      el('historyTitle').textContent = userName(user);
+      el('historyMeta').textContent = `Telegram ID: ${id}`;
+
+      const container = el('downloads');
+      container.replaceChildren(
+        make('div', 'status', 'Yuklamalar tarixi olinmoqda…')
+      );
+
+      try {
+        const response = await request(
+          `/api/users/${encodeURIComponent(id)}/downloads`
+        );
+
+        const data = await response.json();
+        const rows = Array.isArray(data.downloads) ? data.downloads : [];
+
+        container.replaceChildren();
+
+        if (!rows.length) {
+          container.append(
+            make('div', 'empty', 'Bu foydalanuvchida yuklamalar tarixi topilmadi.')
+          );
+          return;
+        }
+
+        rows.forEach(item => {
+          const card = make('article', 'download');
+
+          const title = first(
+            item,
+            ['title', 'original_name', 'filename', 'file_name', 'url', 'source_url'],
+            'Media fayl'
+          );
+
+          card.append(make('div', 'download-title', title));
+
+          const date = first(
+            item,
+            ['created_at', 'downloaded_at', 'date', 'timestamp'],
+            ''
+          );
+
+          const platform = first(item, ['platform', 'source', 'service'], '');
+
+          const meta = [
+            platform,
+            date,
+            item.id !== undefined ? `ID: ${item.id}` : ''
+          ].filter(Boolean).join(' · ');
+
+          card.append(
+            make('div', 'download-meta', meta || 'Yuklama ma’lumoti')
+          );
+
+          const actions = make('div', 'actions');
+
+          const assetId = first(
+            item,
+            ['asset_id', 'media_asset_id', 'media_id'],
+            null
+          );
+
+          if (assetId !== null) {
+            const open = make('button', 'btn', 'Media ochish');
+            open.type = 'button';
+
+            open.addEventListener('click', async () => {
+              try {
+                const res = await request(
+                  `/api/media/${encodeURIComponent(assetId)}`
+                );
+
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const win = window.open(url, '_blank');
+
+                if (!win) {
+                  const link = document.createElement('a');
+                  link.href = url;
+                  link.download = String(title);
+                  link.click();
+                }
+
+                setTimeout(() => URL.revokeObjectURL(url), 60000);
+              } catch (error) {
+                alert(error.message || 'Media ochilmadi.');
+              }
+            });
+
+            actions.append(open);
+          }
+
+          const sourceUrl = first(
+            item,
+            ['url', 'source_url', 'original_url'],
+            null
+          );
+
+          if (sourceUrl && /^https?:\/\//i.test(String(sourceUrl))) {
+            const link = make('a', 'btn secondary', 'Manbani ochish');
+            link.href = sourceUrl;
+            link.target = '_blank';
+            link.rel = 'noopener noreferrer';
+            actions.append(link);
+          }
+
+          if (actions.childElementCount) card.append(actions);
+          container.append(card);
+        });
+      } catch (error) {
+        container.replaceChildren(
+          make(
+            'div',
+            'status error',
+            error && error.message
+              ? error.message
+              : 'Yuklamalar tarixini olishda xatolik.'
+          )
+        );
+      }
+    }
+
+    el('search').addEventListener('input', renderUsers);
+    el('refresh').addEventListener('click', loadDashboard);
+
+    el('back').addEventListener('click', () => {
+      el('historySection').classList.add('hidden');
+      el('userSection').classList.remove('hidden');
+    });
+
+    loadDashboard();
+  })();
+  </script>
+</body>
+</html>
