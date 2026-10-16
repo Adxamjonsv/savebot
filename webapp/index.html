@@ -1,858 +1,208 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="uz">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#0b1220">
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#10131b">
   <title>Savebot — Admin panel</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
-    :root {
-      color-scheme: dark;
-      --bg: #09111f;
-      --panel: #111d30;
-      --panel2: #17253a;
-      --border: #263750;
-      --text: #f2f6ff;
-      --muted: #8ea5c5;
-      --blue: #2686ff;
-      --purple: #8155ff;
-      --green: #12d69a;
-      --red: #ff5d78;
-    }
-
-    * { box-sizing: border-box; }
-
-    body {
-      margin: 0;
-      background: var(--bg);
-      color: var(--text);
-      font: 14px/1.5 Inter, -apple-system, BlinkMacSystemFont,
-            "Segoe UI", Arial, sans-serif;
-    }
-
-    button, input, select { font: inherit; }
-    button { cursor: pointer; }
-
-    .layout { min-height: 100vh; }
-
-    .topbar {
-      height: 76px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 25px;
-      border-bottom: 1px solid var(--border);
-      background: #0d1829;
-      position: sticky;
-      top: 0;
-      z-index: 10;
-    }
-
-    .brand { display: flex; align-items: center; gap: 13px; }
-
-    .brand-icon {
-      width: 48px;
-      height: 48px;
-      display: grid;
-      place-items: center;
-      border-radius: 15px;
-      background: linear-gradient(135deg, var(--blue), var(--purple));
-      font-size: 25px;
-      font-weight: 800;
-    }
-
-    .brand-name { font-size: 21px; font-weight: 800; }
-    .muted { color: var(--muted); }
-    .small { font-size: 12px; }
-
-    .top-right {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-    }
-
-    .profile {
-      width: 40px;
-      height: 40px;
-      border-radius: 50%;
-      display: grid;
-      place-items: center;
-      background: #4f45a6;
-      font-weight: 800;
-    }
-
-    .shell {
-      display: grid;
-      grid-template-columns: 220px minmax(0, 1fr);
-      min-height: calc(100vh - 76px);
-    }
-
-    aside {
-      background: #0d192a;
-      border-right: 1px solid var(--border);
-      padding: 18px 13px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .nav {
-      border: 0;
-      background: transparent;
-      color: #c6d4e9;
-      padding: 13px 14px;
-      border-radius: 12px;
-      text-align: left;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      width: 100%;
-    }
-
-    .nav:hover, .nav.active {
-      color: white;
-      background: linear-gradient(110deg, #2788ff, #8155ff);
-    }
-
-    .nav-icon { font-size: 19px; width: 24px; text-align: center; }
-
-    .side-bottom {
-      margin-top: auto;
-      padding: 15px;
-      border: 1px solid var(--border);
-      border-radius: 15px;
-      background: var(--panel);
-    }
-
-    .side-bottom button { width: 100%; margin-top: 12px; }
-
-    main { padding: 20px; min-width: 0; }
-
-    .page { display: none; }
-    .page.active { display: block; }
-
-    .stats {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 14px;
-      margin-bottom: 17px;
-    }
-
-    .stat, .card, .platform {
-      border: 1px solid var(--border);
-      background: linear-gradient(145deg, #142239, #101b2d);
-      border-radius: 17px;
-    }
-
-    .stat {
-      padding: 18px;
-      min-height: 130px;
-    }
-
-    .stat-top { display: flex; gap: 12px; align-items: center; }
-
-    .stat-icon {
-      width: 49px;
-      height: 49px;
-      border-radius: 14px;
-      display: grid;
-      place-items: center;
-      font-size: 23px;
-      background: linear-gradient(135deg, #168bff, #5e50fa);
-    }
-
-    .stat-label { color: #c1d0e7; font-size: 13px; }
-    .stat-number { font-size: 30px; font-weight: 800; margin-top: 7px; }
-
-    .platforms {
-      display: grid;
-      grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: 14px;
-      margin-bottom: 18px;
-    }
-
-    .platform {
-      padding: 16px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      min-width: 0;
-    }
-
-    .platform-symbol {
-      width: 46px;
-      height: 46px;
-      border-radius: 13px;
-      display: grid;
-      place-items: center;
-      background: #202e45;
-      font-size: 24px;
-      flex-shrink: 0;
-    }
-
-    .platform strong { display: block; }
-    .platform span { color: var(--muted); font-size: 12px; }
-
-    .content-grid {
-      display: grid;
-      grid-template-columns: minmax(0, 1.7fr) minmax(270px, .9fr);
-      gap: 16px;
-      margin-bottom: 18px;
-    }
-
-    .card { padding: 17px; min-width: 0; }
-
-    .card-heading {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 10px;
-      margin-bottom: 16px;
-    }
-
-    h2 { margin: 0; font-size: 17px; }
-    h3 { margin: 0 0 7px; font-size: 16px; }
-
-    .btn {
-      border: 1px solid #30435f;
-      border-radius: 11px;
-      padding: 10px 13px;
-      color: white;
-      background: #142239;
-    }
-
-    .btn:hover { border-color: var(--blue); }
-    .btn.primary {
-      border: 0;
-      background: linear-gradient(110deg, var(--blue), var(--purple));
-    }
-
-    .btn:disabled { opacity: .5; cursor: wait; }
-
-    .toolbar {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 9px;
-      margin-bottom: 13px;
-    }
-
-    input, select {
-      background: #0b1728;
-      color: white;
-      border: 1px solid #2b3c55;
-      border-radius: 11px;
-      padding: 12px;
-      outline: none;
-      min-width: 0;
-    }
-
-    input:focus, select:focus { border-color: var(--blue); }
-    .search { flex: 1; min-width: 180px; width: 100%; }
-
-    .table-wrap { width: 100%; overflow-x: auto; }
-
-    table { width: 100%; border-collapse: collapse; min-width: 570px; }
-
-    th, td {
-      padding: 13px 10px;
-      text-align: left;
-      border-bottom: 1px solid #25344b;
-      white-space: nowrap;
-    }
-
-    th { color: var(--muted); font-size: 12px; font-weight: 600; }
-    td { font-size: 13px; }
-    tr:last-child td { border-bottom: 0; }
-
-    .avatar {
-      width: 36px;
-      height: 36px;
-      border-radius: 50%;
-      display: inline-grid;
-      place-items: center;
-      background: #4a4798;
-      font-weight: 800;
-      margin-right: 8px;
-      vertical-align: middle;
-    }
-
-    .user-cell { display: flex; align-items: center; gap: 5px; }
-    .green { color: var(--green); }
-    .empty { padding: 25px; text-align: center; color: var(--muted); }
-
-    .bars { display: grid; gap: 17px; }
-    .bar-row { display: grid; grid-template-columns: 80px 1fr 48px; gap: 10px; align-items: center; }
-    .bar-track { height: 10px; border-radius: 20px; background: #202f46; overflow: hidden; }
-    .bar-fill { height: 100%; border-radius: 20px; background: linear-gradient(90deg, var(--blue), #d43df2); }
-
-    .section-title { margin: 5px 0 15px; font-size: 22px; }
-
-    .history-item {
-      border: 1px solid var(--border);
-      border-radius: 14px;
-      padding: 14px;
-      margin-bottom: 12px;
-      background: #152338;
-      overflow: hidden;
-    }
-
-    .history-url {
-      display: block;
-      color: #d8e6ff;
-      overflow-wrap: anywhere;
-      margin-bottom: 7px;
-    }
-
-    .media-player {
-      width: 100%;
-      max-height: 480px;
-      margin-top: 12px;
-      background: #05080d;
-      border-radius: 12px;
-    }
-
-    .media-image {
-      width: 100%;
-      max-height: 450px;
-      object-fit: contain;
-      margin-top: 12px;
-      border-radius: 12px;
-      background: #05080d;
-    }
-
-    .notice {
-      border: 1px solid #5d496a;
-      background: #251c34;
-      border-radius: 12px;
-      padding: 12px;
-      margin: 12px 0;
-      overflow-wrap: anywhere;
-    }
-
-    .footer {
-      text-align: center;
-      color: #7187a5;
-      padding: 22px 0 8px;
-      font-size: 12px;
-    }
-
-    .hidden { display: none !important; }
-    .loading { color: var(--muted); padding: 20px; text-align: center; }
-
-    @media (max-width: 1100px) {
-      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .platforms { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .content-grid { grid-template-columns: 1fr; }
-    }
-
-    @media (max-width: 700px) {
-      .topbar { height: 65px; padding: 0 13px; }
-      .brand-icon { width: 39px; height: 39px; }
-      .brand-name { font-size: 17px; }
-      .top-right .muted, .top-right .date { display: none; }
-      .shell { display: block; }
-      aside {
-        position: sticky;
-        top: 65px;
-        z-index: 9;
-        display: flex;
-        flex-direction: row;
-        overflow-x: auto;
-        padding: 8px;
-        border-right: 0;
-        border-bottom: 1px solid var(--border);
-      }
-      .nav { flex: 0 0 auto; width: auto; padding: 10px 12px; }
-      .nav span:last-child { display: none; }
-      .side-bottom { display: none; }
-      main { padding: 12px; }
-      .stats { gap: 9px; }
-      .stat { padding: 12px; min-height: 104px; }
-      .stat-icon { width: 36px; height: 36px; font-size: 18px; }
-      .stat-label { font-size: 11px; }
-      .stat-number { font-size: 25px; }
-      .platforms { gap: 9px; }
-      .platform { padding: 11px; gap: 8px; }
-      .platform-symbol { width: 35px; height: 35px; font-size: 18px; }
-      .platform strong { font-size: 12px; }
-      .platform span { font-size: 10px; }
-      .card { padding: 13px; }
-      .card-heading { align-items: flex-start; }
-      .section-title { font-size: 19px; }
-      .bar-row { grid-template-columns: 65px 1fr 35px; }
-    }
-
-    @media (max-width: 360px) {
-      .stats { grid-template-columns: 1fr 1fr; }
-      .platforms { grid-template-columns: 1fr; }
-    }
+    :root{color-scheme:dark;--bg:var(--tg-theme-bg-color,#0d1119);--panel:var(--tg-theme-secondary-bg-color,#171d29);--panel2:#1d2534;--text:var(--tg-theme-text-color,#f4f6fb);--muted:var(--tg-theme-hint-color,#9aa7bb);--accent:var(--tg-theme-button-color,#7868ff);--line:rgba(160,176,204,.16);--danger:#ff7188;--good:#4bd5a2;--radius:18px}
+    *{box-sizing:border-box}html{min-height:100%;background:var(--bg)}body{margin:0;background:radial-gradient(ellipse at top right,rgba(120,104,255,.10),transparent 34%),var(--bg);color:var(--text);font:14px/1.45 system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,input{font:inherit}button,a{ -webkit-tap-highlight-color:transparent}button{cursor:pointer}.wrap{width:min(1120px,100%);margin:auto;padding:18px 15px calc(32px + env(safe-area-inset-bottom))}.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:20px}.brand{display:flex;align-items:center;gap:11px;min-width:0}.logo{width:45px;height:45px;display:grid;place-items:center;flex:0 0 45px;border-radius:15px;background:linear-gradient(135deg,#8c7cff,#5746e8);box-shadow:0 8px 24px #6657ff33;font-size:21px;font-weight:900}.title{font-size:20px;font-weight:850;letter-spacing:-.5px}.subtitle{color:var(--muted);font-size:12px}.connection{display:flex;align-items:center;gap:7px;white-space:nowrap;border:1px solid var(--line);background:var(--panel);border-radius:30px;padding:7px 10px;color:var(--muted);font-size:11px}.dot{width:7px;height:7px;border-radius:50%;background:var(--good)}.dot.bad{background:var(--danger)}.section{margin-top:22px}.section-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 12px}.section-head h2{margin:0;font-size:17px;letter-spacing:-.2px}.section-head p{margin:3px 0 0;color:var(--muted);font-size:12px}.stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:11px}.stat{min-width:0;padding:15px;border:1px solid var(--line);border-radius:var(--radius);background:linear-gradient(145deg,var(--panel),rgba(23,29,41,.82))}.stat-label{font-size:12px;color:var(--muted)}.stat-num{font-size:27px;font-weight:850;letter-spacing:-.8px;margin-top:6px;overflow-wrap:anywhere}.stat-icon{font-size:18px;margin-bottom:8px}.platforms{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:11px}.platform{position:relative;overflow:hidden;display:flex;align-items:center;gap:12px;text-align:left;width:100%;min-width:0;padding:14px;border:1px solid var(--line);border-radius:var(--radius);background:var(--panel);color:var(--text);transition:transform .15s,border-color .15s}.platform:active{transform:scale(.985)}.platform:hover,.platform.active{border-color:var(--accent)}.platform.active{box-shadow:0 0 0 1px var(--accent) inset;background:linear-gradient(135deg,rgba(120,104,255,.16),var(--panel))}.platform-icon{width:43px;height:43px;flex:0 0 43px;display:grid;place-items:center;border-radius:14px;background:var(--panel2);font-size:21px}.platform-name{font-weight:750;font-size:13px}.platform-count{font-size:12px;color:var(--muted);margin-top:3px}.platform-arrow{margin-left:auto;color:var(--muted);font-size:19px}.toolbar{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:13px}.search{flex:1 1 180px;min-width:0;width:100%;padding:12px 13px;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:13px;outline:none}.search:focus{border-color:var(--accent)}.select{padding:11px 12px;max-width:100%;background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:12px}.btn{display:inline-flex;align-items:center;justify-content:center;gap:7px;padding:10px 13px;border:0;border-radius:12px;background:var(--accent);color:#fff;font-weight:750;text-decoration:none}.btn.secondary{background:transparent;border:1px solid var(--line);color:var(--text)}.btn:disabled{opacity:.5;cursor:wait}.gallery{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:13px}.media-card{min-width:0;overflow:hidden;border:1px solid var(--line);border-radius:17px;background:var(--panel)}.preview{position:relative;aspect-ratio:16/10;background:#080b10;display:grid;place-items:center;overflow:hidden}.preview video{display:block;width:100%;height:100%;object-fit:contain;background:#05070a}.preview-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--muted);padding:20px;text-align:center}.play-symbol{display:grid;place-items:center;width:52px;height:52px;border-radius:50%;background:#ffffff16;border:1px solid #ffffff2a;font-size:23px}.unavailable{font-size:12px;color:var(--danger)}.media-info{padding:12px}.media-title{font-size:13px;font-weight:750;overflow-wrap:anywhere;word-break:break-word}.media-meta{font-size:11px;color:var(--muted);margin-top:5px;overflow-wrap:anywhere}.media-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:11px}.media-actions .btn{font-size:12px;padding:8px 10px}.tag{display:inline-flex;align-items:center;padding:4px 7px;border-radius:7px;background:rgba(120,104,255,.15);color:#c6bdff;font-size:10px;font-weight:750;margin-bottom:7px}.users{display:grid;gap:9px}.user{display:flex;align-items:center;gap:11px;min-width:0;padding:12px;border:1px solid var(--line);border-radius:15px;background:var(--panel)}.avatar{width:42px;height:42px;flex:0 0 42px;border-radius:14px;display:grid;place-items:center;background:rgba(120,104,255,.19);font-weight:850;font-size:16px}.user-info{flex:1;min-width:0}.user-name{font-weight:750;overflow-wrap:anywhere}.user-meta{font-size:11px;color:var(--muted);overflow-wrap:anywhere}.downloads{display:grid;gap:10px}.download{padding:13px;border:1px solid var(--line);border-radius:15px;background:var(--panel);min-width:0}.download-title{font-weight:750;overflow-wrap:anywhere}.download-meta{font-size:11px;color:var(--muted);margin:5px 0 10px;overflow-wrap:anywhere}.actions{display:flex;gap:8px;flex-wrap:wrap}.status,.empty{padding:22px 15px;text-align:center;color:var(--muted);border:1px dashed var(--line);background:var(--panel);border-radius:15px}.status.error{color:var(--danger);white-space:pre-wrap;overflow-wrap:anywhere}.hidden{display:none!important}.back{margin-bottom:12px}.foot{text-align:center;margin-top:27px;color:var(--muted);font-size:11px}.view-tabs{display:flex;gap:7px;margin:0 0 16px;padding:4px;background:var(--panel);border:1px solid var(--line);border-radius:14px}.tab{flex:1;padding:10px 8px;border:0;border-radius:10px;background:transparent;color:var(--muted);font-weight:750}.tab.active{background:var(--panel2);color:var(--text)}
+    @media(max-width:760px){.gallery{grid-template-columns:repeat(2,minmax(0,1fr))}.platforms{grid-template-columns:repeat(2,minmax(0,1fr))}.platform{padding:12px;gap:9px}.platform-icon{width:39px;height:39px;flex-basis:39px}.wrap{padding:14px 12px 28px}.stat{padding:12px}.stat-num{font-size:24px}}
+    @media(max-width:420px){.gallery{grid-template-columns:1fr}.preview{aspect-ratio:16/9}.stats{gap:7px}.stat{padding:10px}.stat-label{font-size:10px}.stat-num{font-size:22px}.title{font-size:18px}.logo{width:40px;height:40px;flex-basis:40px}.connection{font-size:10px;padding:6px 8px}.platform-name{font-size:12px}.platform-count{font-size:11px}.user .btn{padding:9px 10px;font-size:12px}}
   </style>
 </head>
 <body>
-<div class="layout">
-  <header class="topbar">
-    <div class="brand">
-      <div class="brand-icon">➤</div>
-      <div>
-        <div class="brand-name">Save_svbot</div>
-        <div class="muted small">Admin panel</div>
-      </div>
-    </div>
-    <div class="top-right">
-      <div class="date muted small" id="currentDate"></div>
-      <div class="profile" id="profileAvatar">A</div>
-      <strong id="adminName">Admin</strong>
-    </div>
+<main class="wrap">
+  <header class="top">
+    <div class="brand"><div class="logo">S</div><div><div class="title">Savebot Admin</div><div class="subtitle">Yuklamalar boshqaruvi</div></div></div>
+    <div class="connection"><span class="dot" id="connectionDot"></span><span id="connection">Ulanmoqda…</span></div>
   </header>
 
-  <div class="shell">
-    <aside>
-      <button class="nav active" data-page="home"><span class="nav-icon">⌂</span><span>Bosh sahifa</span></button>
-      <button class="nav" data-page="users"><span class="nav-icon">♙</span><span>Foydalanuvchilar</span></button>
-      <button class="nav" data-page="downloads"><span class="nav-icon">⇩</span><span>Yuklamalar</span></button>
-      <button class="nav" data-page="stats"><span class="nav-icon">▥</span><span>Statistika</span></button>
-      <div class="side-bottom">
-        <strong>👑 Save_svbot</strong>
-        <p class="muted small">Instagram, YouTube, TikTok va boshqa platformalardan video yuklash boti.</p>
-        <button class="btn primary" id="openBot">➤ Botni ochish</button>
+  <div id="status" class="status">Admin ma’lumotlari yuklanmoqda…</div>
+  <section id="app" class="hidden">
+    <div class="stats">
+      <article class="stat"><div class="stat-icon">👥</div><div class="stat-label">Jami foydalanuvchilar</div><div class="stat-num" id="totalUsers">—</div></article>
+      <article class="stat"><div class="stat-icon">⬇️</div><div class="stat-label">Jami yuklamalar</div><div class="stat-num" id="totalDownloads">—</div></article>
+      <article class="stat"><div class="stat-icon">🟢</div><div class="stat-label">Bugun faol</div><div class="stat-num" id="todayActive">—</div></article>
+    </div>
+
+    <section class="section" id="platformSection">
+      <div class="section-head"><div><h2>Media galereyasi</h2><p>Platformani tanlang — saqlangan videolar ochiladi</p></div><button class="btn secondary" id="refreshGallery" type="button">↻ Yangilash</button></div>
+      <div class="platforms" id="platforms">
+        <button class="platform active" data-platform="all" type="button"><span class="platform-icon">🗂️</span><span><span class="platform-name">Barchasi</span><span class="platform-count" id="count-all">Barcha media</span></span><span class="platform-arrow">›</span></button>
+        <button class="platform" data-platform="instagram" type="button"><span class="platform-icon">📸</span><span><span class="platform-name">Instagram</span><span class="platform-count" id="count-instagram">Media</span></span><span class="platform-arrow">›</span></button>
+        <button class="platform" data-platform="youtube" type="button"><span class="platform-icon">▶️</span><span><span class="platform-name">YouTube</span><span class="platform-count" id="count-youtube">Media</span></span><span class="platform-arrow">›</span></button>
+        <button class="platform" data-platform="tiktok" type="button"><span class="platform-icon">🎵</span><span><span class="platform-name">TikTok</span><span class="platform-count" id="count-tiktok">Media</span></span><span class="platform-arrow">›</span></button>
       </div>
-    </aside>
+    </section>
 
-    <main>
-      <section class="page active" id="page-home">
-        <div class="stats">
-          <div class="stat">
-            <div class="stat-top"><div class="stat-icon">♙</div><div class="stat-label">Jami foydalanuvchilar</div></div>
-            <div class="stat-number" id="totalUsers">—</div>
-            <div class="muted small">Barcha vaqt davomida</div>
-          </div>
-          <div class="stat">
-            <div class="stat-top"><div class="stat-icon">⇩</div><div class="stat-label">Jami yuklamalar</div></div>
-            <div class="stat-number" id="totalDownloads">—</div>
-            <div class="muted small">Barcha vaqt davomida</div>
-          </div>
-          <div class="stat">
-            <div class="stat-top"><div class="stat-icon">▤</div><div class="stat-label">Bugungi yuklamalar</div></div>
-            <div class="stat-number" id="todayActive">—</div>
-            <div class="muted small">Bugungi faollik</div>
-          </div>
-          <div class="stat">
-            <div class="stat-top"><div class="stat-icon">◉</div><div class="stat-label">Faol foydalanuvchilar</div></div>
-            <div class="stat-number" id="activeUsers">—</div>
-            <div class="muted small">Tarixda yuklamasi bor</div>
-          </div>
-        </div>
+    <section class="section" id="gallerySection">
+      <div class="section-head"><div><h2 id="galleryTitle">Barcha media</h2><p id="gallerySubtitle">Arxivdagi video va fayllar</p></div><span class="subtitle" id="galleryCount">0 ta</span></div>
+      <div class="toolbar"><input class="search" id="gallerySearch" type="search" placeholder="Fayl, foydalanuvchi yoki ID bo‘yicha qidirish…" autocomplete="off"><select class="select" id="mediaType"><option value="all">Barcha turlar</option><option value="video">Video</option><option value="image">Rasm</option><option value="other">Boshqa</option></select></div>
+      <div id="galleryStatus" class="status hidden">Galereya yuklanmoqda…</div>
+      <div id="gallery" class="gallery"></div>
+    </section>
 
-        <div class="platforms">
-          <div class="platform"><div class="platform-symbol">📸</div><div><strong>Instagram</strong><span>Reels, Post, Story</span></div></div>
-          <div class="platform"><div class="platform-symbol">▶️</div><div><strong>YouTube</strong><span>Video, Shorts</span></div></div>
-          <div class="platform"><div class="platform-symbol">🎵</div><div><strong>TikTok</strong><span>Videolar</span></div></div>
-          <div class="platform"><div class="platform-symbol">🔗</div><div><strong>Boshqa</strong><span>Boshqa platformalar</span></div></div>
-        </div>
+    <section class="section" id="usersSection">
+      <div class="section-head"><div><h2>Foydalanuvchilar</h2><p>Foydalanuvchi tarixini ko‘rish</p></div><button class="btn secondary" id="refreshUsers" type="button">↻ Yangilash</button></div>
+      <input class="search" id="userSearch" type="search" placeholder="Ism, username yoki Telegram ID…" autocomplete="off">
+      <div class="users" id="users" style="margin-top:12px"></div>
+    </section>
 
-        <div class="content-grid">
-          <div class="card">
-            <div class="card-heading">
-              <h2>◷ So‘nggi yuklamalar</h2>
-              <button class="btn" data-goto="downloads">Barchasini ko‘rish →</button>
-            </div>
-            <div class="table-wrap">
-              <table>
-                <thead><tr><th>#</th><th>Foydalanuvchi</th><th>Platforma</th><th>Holat</th><th>Vaqt</th></tr></thead>
-                <tbody id="recentDownloads"><tr><td colspan="5" class="empty">Ma’lumot yuklanmoqda...</td></tr></tbody>
-              </table>
-            </div>
-          </div>
-          <div class="card">
-            <div class="card-heading"><h2>▥ Platformalar bo‘yicha</h2></div>
-            <div id="platformBars" class="bars"><div class="loading">Yuklanmoqda...</div></div>
-          </div>
-        </div>
-
-        <div class="card">
-          <div class="card-heading">
-            <h2>♙ Foydalanuvchilar ro‘yxati</h2>
-            <button class="btn" data-goto="users">Barchasi →</button>
-          </div>
-          <div class="toolbar">
-            <input class="search" id="homeSearch" placeholder="Ism yoki Telegram ID bo‘yicha qidirish...">
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>#</th><th>Foydalanuvchi</th><th>Telegram ID</th><th>Yuklamalar</th><th>Oxirgi faollik</th><th></th></tr></thead>
-              <tbody id="homeUsers"><tr><td colspan="6" class="empty">Ma’lumot yuklanmoqda...</td></tr></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <section class="page" id="page-users">
-        <h2 class="section-title">Foydalanuvchilar</h2>
-        <div class="card">
-          <div class="toolbar">
-            <input class="search" id="usersSearch" placeholder="Ism, username yoki Telegram ID...">
-            <button class="btn" id="refreshUsers">↻ Yangilash</button>
-          </div>
-          <div class="table-wrap">
-            <table>
-              <thead><tr><th>#</th><th>Foydalanuvchi</th><th>Telegram ID</th><th>Yuklamalar</th><th>Oxirgi faollik</th><th>Tarix</th></tr></thead>
-              <tbody id="usersTable"><tr><td colspan="6" class="empty">Yuklanmoqda...</td></tr></tbody>
-            </table>
-          </div>
-        </div>
-      </section>
-
-      <section class="page" id="page-downloads">
-        <h2 class="section-title">Yuklamalar tarixi</h2>
-        <div class="card">
-          <div class="toolbar">
-            <input class="search" id="downloadsSearch" placeholder="Platforma yoki manba URL bo‘yicha qidirish...">
-          </div>
-          <div id="allDownloads"><div class="loading">Avval foydalanuvchi tanlang yoki uning tarixini oching.</div></div>
-        </div>
-      </section>
-
-      <section class="page" id="page-stats">
-        <h2 class="section-title">Statistika</h2>
-        <div class="stats">
-          <div class="stat"><div class="stat-label">Jami foydalanuvchilar</div><div class="stat-number" id="statsUsers">—</div></div>
-          <div class="stat"><div class="stat-label">Jami yuklamalar</div><div class="stat-number" id="statsDownloads">—</div></div>
-        </div>
-        <div class="content-grid">
-          <div class="card">
-            <h2>Platformalar taqsimoti</h2>
-            <canvas id="platformChart" height="240"></canvas>
-          </div>
-          <div class="card">
-            <h2>Platformalar ro‘yxati</h2>
-            <div id="statsPlatformBars" class="bars" style="margin-top:20px"></div>
-          </div>
-        </div>
-      </section>
-
-      <section class="page" id="page-history">
-        <button class="btn" id="backToUsers">← Orqaga</button>
-        <h2 class="section-title" id="historyTitle" style="margin-top:18px">Foydalanuvchi tarixi</h2>
-        <div class="muted" id="historySubtitle"></div>
-        <div id="historyList" style="margin-top:18px"><div class="loading">Tarix yuklanmoqda...</div></div>
-      </section>
-
-      <div class="footer">Savebot • Admin panel</div>
-    </main>
-  </div>
-</div>
-
+    <section class="section hidden" id="historySection">
+      <div class="section-head"><div><button class="btn secondary back" id="backToUsers" type="button">← Foydalanuvchilarga</button><h2 id="historyTitle">Yuklamalar tarixi</h2><p id="historyMeta"></p></div></div>
+      <div class="downloads" id="downloads"></div>
+    </section>
+  </section>
+  <footer class="foot">Savebot • Admin panel</footer>
+</main>
 <script>
 (() => {
-  const tg = window.Telegram?.WebApp;
-  tg?.ready();
-  tg?.expand();
-
-  const initData = tg?.initData || "";
+  'use strict';
+  const tg = window.Telegram && window.Telegram.WebApp;
+  if (tg) { tg.ready(); tg.expand(); try { tg.setHeaderColor('secondary_bg_color'); tg.setBackgroundColor('#0d1119'); } catch (_) {} }
+  const initData = tg && tg.initData ? tg.initData : '';
+  const headers = {'X-Telegram-Init-Data': initData};
   const $ = id => document.getElementById(id);
-  const allUsers = [];
-  let dashboard = { total_users: 0, total_downloads: 0, today_active: 0, users: [] };
-  let chart = null;
-  let currentHistoryUser = null;
+  let users = [], mediaItems = [], selectedPlatform = 'all', selectedUser = null;
+  const blobUrls = new Set();
+  const platformNames = {all:'Barcha media',instagram:'Instagram',youtube:'YouTube',tiktok:'TikTok',other:'Boshqa'};
 
-  $("currentDate").textContent = new Date().toLocaleString("uz-UZ", {
-    day: "2-digit", month: "short", year: "numeric",
-    hour: "2-digit", minute: "2-digit"
-  });
-
-  if (tg?.initDataUnsafe?.user) {
-    const u = tg.initDataUnsafe.user;
-    $("adminName").textContent = u.first_name || "Admin";
-    $("profileAvatar").textContent = (u.first_name || "A").slice(0,1).toUpperCase();
+  function node(tag, cls, text) { const n=document.createElement(tag); if(cls)n.className=cls; if(text!==undefined)n.textContent=String(text??''); return n; }
+  function first(obj, keys, fallback='') { if(!obj || typeof obj!=='object')return fallback; for(const k of keys)if(obj[k]!==undefined&&obj[k]!==null&&obj[k]!=='')return obj[k]; return fallback; }
+  function fmt(v) { if(v===null||v===undefined||v==='')return '—'; if(typeof v==='number')return v.toLocaleString('uz-UZ'); return String(v); }
+  function userId(u) { return first(u,['user_id','telegram_id','id','tg_id'],''); }
+  function userName(u) { const full=[first(u,['full_name','first_name','firstName','name']),first(u,['last_name','lastName'])].filter(Boolean).join(' ').trim(); const uname=first(u,['username'],''); return full || (uname ? '@'+String(uname).replace(/^@/,'') : (userId(u)?`Foydalanuvchi ${userId(u)}`:'Noma’lum foydalanuvchi')); }
+  function dateText(v) { if(!v)return 'Sana noma’lum'; let d; if(typeof v==='number'||/^\d{10,13}$/.test(String(v))){let x=Number(v);if(String(Math.trunc(x)).length===13)x/=1000;d=new Date(x*1000);}else d=new Date(v); return Number.isNaN(d.getTime())?String(v):d.toLocaleString('uz-UZ',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}); }
+  function setConnection(text, bad=false) { $('connection').textContent=text; $('connectionDot').classList.toggle('bad',bad); }
+  function showFatal(msg) { $('status').className='status error'; $('status').textContent=msg; $('status').classList.remove('hidden'); $('app').classList.add('hidden'); setConnection('Xatolik',true); }
+  async function request(path) {
+    if(!initData)throw new Error('Telegram sessiyasi topilmadi. Mini App’ni bot ichidagi admin tugmasi orqali oching.');
+    const r=await fetch(path,{headers,cache:'no-store'});
+    if(!r.ok){const body=await r.text();let detail=body;try{const j=JSON.parse(body);detail=j.detail||body;}catch(_){}throw new Error(`API xatosi ${r.status}: ${detail||r.statusText}`);}
+    return r;
   }
-
-  $("openBot").onclick = () => {
-    if (tg) tg.openTelegramLink("https://t.me/save_sv_bot");
-    else window.open("https://t.me/save_sv_bot", "_blank");
-  };
-
-  function escapeHtml(value) {
-    return String(value ?? "").replace(/[&<>"']/g, ch => ({
-      "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
-    })[ch]);
-  }
-
-  function dateText(value) {
-    if (!value) return "—";
-    const d = new Date(value);
-    if (Number.isNaN(d.getTime())) return String(value);
-    return d.toLocaleString("uz-UZ", {
-      day: "2-digit", month: "2-digit", year: "numeric",
-      hour: "2-digit", minute: "2-digit"
-    });
-  }
-
-  function platformName(value) {
-    const p = String(value || "other").toLowerCase();
-    if (p.includes("instagram")) return "Instagram";
-    if (p.includes("youtube")) return "YouTube";
-    if (p.includes("tiktok")) return "TikTok";
-    return "Boshqa";
-  }
-
-  function platformIcon(value) {
-    const p = platformName(value);
-    return p === "Instagram" ? "📸" : p === "YouTube" ? "▶️" :
-           p === "TikTok" ? "🎵" : "🔗";
-  }
-
-  async function api(path) {
-    const response = await fetch(path, {
-      headers: { "X-Telegram-Init-Data": initData }
-    });
-    if (!response.ok) {
-      const message = await response.text().catch(() => "");
-      throw new Error(`Server xatosi (${response.status}) ${message.slice(0,180)}`);
-    }
-    return response;
-  }
-
-  function showPage(name) {
-    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
-    $("page-" + name)?.classList.add("active");
-    document.querySelectorAll(".nav").forEach(b =>
-      b.classList.toggle("active", b.dataset.page === name)
-    );
-  }
-
-  document.querySelectorAll(".nav").forEach(button => {
-    button.addEventListener("click", () => showPage(button.dataset.page));
-  });
-
-  document.querySelectorAll("[data-goto]").forEach(button => {
-    button.addEventListener("click", () => showPage(button.dataset.goto));
-  });
-
-  function renderUsers(list, targetId) {
-    const target = $(targetId);
-    if (!list.length) {
-      target.innerHTML = `<tr><td colspan="6" class="empty">Foydalanuvchi topilmadi.</td></tr>`;
-      return;
-    }
-
-    target.innerHTML = list.map((u, index) => `
-      <tr>
-        <td>${index + 1}</td>
-        <td><div class="user-cell"><span class="avatar">${escapeHtml((u.full_name || "U").slice(0,1).toUpperCase())}</span>
-          <span><strong>${escapeHtml(u.full_name || "Noma’lum")}</strong><br>
-          <span class="muted small">${u.username ? "@"+escapeHtml(u.username) : "Telegram foydalanuvchisi"}</span></span></div></td>
-        <td>${escapeHtml(u.user_id)}</td>
-        <td class="green"><strong>${Number(u.download_count || 0)}</strong></td>
-        <td>${escapeHtml(dateText(u.last_download || u.joined_at))}</td>
-        <td><button class="btn history-btn" data-user="${escapeHtml(u.user_id)}">Tarix</button></td>
-      </tr>`).join("");
-
-    target.querySelectorAll(".history-btn").forEach(button => {
-      button.addEventListener("click", () => openHistory(button.dataset.user));
-    });
-  }
-
-  function filterUsers(query, target) {
-    const q = query.trim().toLowerCase();
-    const filtered = allUsers.filter(u =>
-      [u.full_name, u.username, u.user_id].some(v =>
-        String(v || "").toLowerCase().includes(q)
-      )
-    );
-    renderUsers(filtered, target);
-  }
-
-  $("homeSearch").addEventListener("input", e => filterUsers(e.target.value, "homeUsers"));
-  $("usersSearch").addEventListener("input", e => filterUsers(e.target.value, "usersTable"));
-  $("refreshUsers").onclick = loadDashboard;
-
-  function getPlatformCounts(users) {
-    const counts = { Instagram: 0, YouTube: 0, TikTok: 0, Boshqa: 0 };
-    users.forEach(u => {
-      // User endpoint supplies aggregate download counts, not per-platform counts.
-      // Platform values are populated from the histories we have actually loaded.
-    });
-    return counts;
-  }
-
-  const knownPlatformCounts = { Instagram: 0, YouTube: 0, TikTok: 0, Boshqa: 0 };
-
-  function renderBars(targetId, counts) {
-    const total = Object.values(counts).reduce((sum, n) => sum + n, 0);
-    $(targetId).innerHTML = Object.entries(counts).map(([name, count]) => `
-      <div class="bar-row">
-        <span>${platformIcon(name)} ${name}</span>
-        <div class="bar-track"><div class="bar-fill" style="width:${total ? count/total*100 : 0}%"></div></div>
-        <strong>${count}</strong>
-      </div>`).join("");
-  }
-
-  function renderPlatformChart(counts) {
-    const canvas = $("platformChart");
-    if (!canvas || !window.Chart) return;
-    if (chart) chart.destroy();
-    chart = new Chart(canvas, {
-      type: "doughnut",
-      data: {
-        labels: Object.keys(counts),
-        datasets: [{ data: Object.values(counts), backgroundColor: ["#e84b9b","#ff3d55","#27c5bb","#8258ff"], borderWidth: 0 }]
-      },
-      options: {
-        responsive: true,
-        plugins: { legend: { labels: { color: "#dbe7f8" } } }
-      }
-    });
-  }
-
-  function renderRecentDownloads() {
-    const recent = [...allUsers]
-      .filter(u => u.last_download)
-      .sort((a,b) => new Date(b.last_download) - new Date(a.last_download))
-      .slice(0, 8);
-
-    $("recentDownloads").innerHTML = recent.length ? recent.map((u, i) => `
-      <tr>
-        <td>${i+1}</td>
-        <td>${escapeHtml(u.full_name || u.user_id)}</td>
-        <td>—</td>
-        <td><span class="muted">Tarixdan oching</span></td>
-        <td>${escapeHtml(dateText(u.last_download))}</td>
-      </tr>`).join("") :
-      `<tr><td colspan="5" class="empty">Hozircha yuklama yo‘q.</td></tr>`;
-  }
+  function safeSource(url) { return typeof url==='string' && /^https?:\/\//i.test(url) ? url : ''; }
 
   async function loadDashboard() {
+    $('refreshUsers').disabled=true; setConnection('Yuklanmoqda…');
     try {
-      const response = await api("/api/dashboard");
-      dashboard = await response.json();
-      $("totalUsers").textContent = dashboard.total_users ?? 0;
-      $("totalDownloads").textContent = dashboard.total_downloads ?? 0;
-      $("todayActive").textContent = dashboard.today_active ?? 0;
-      $("statsUsers").textContent = dashboard.total_users ?? 0;
-      $("statsDownloads").textContent = dashboard.total_downloads ?? 0;
-
-      allUsers.splice(0, allUsers.length, ...(dashboard.users || []));
-      $("activeUsers").textContent = allUsers.filter(u => Number(u.download_count || 0) > 0).length;
-      renderUsers(allUsers, "homeUsers");
-      renderUsers(allUsers, "usersTable");
-      renderRecentDownloads();
-
-      // Dashboard API currently returns aggregate totals, not platform-level counts.
-      // Do not fabricate per-platform statistics.
-      renderBars("platformBars", knownPlatformCounts);
-      renderBars("statsPlatformBars", knownPlatformCounts);
-      renderPlatformChart(knownPlatformCounts);
-    } catch (error) {
-      console.error(error);
-      $("recentDownloads").innerHTML = `<tr><td colspan="5" class="empty">${escapeHtml(error.message)}. Mini App faqat Telegram ichida ishlashi mumkin.</td></tr>`;
-      $("homeUsers").innerHTML = `<tr><td colspan="6" class="empty">${escapeHtml(error.message)}</td></tr>`;
-      $("usersTable").innerHTML = `<tr><td colspan="6" class="empty">${escapeHtml(error.message)}</td></tr>`;
-    }
+      const r=await request('/api/dashboard'), data=await r.json();
+      $('totalUsers').textContent=fmt(data.total_users); $('totalDownloads').textContent=fmt(data.total_downloads); $('todayActive').textContent=fmt(data.today_active);
+      users=Array.isArray(data.users)?data.users:[]; renderUsers();
+      $('status').classList.add('hidden'); $('app').classList.remove('hidden'); setConnection('Ulangan');
+    } catch(e) { showFatal(e.message||'Admin ma’lumotlarini yuklab bo‘lmadi.'); }
+    finally { $('refreshUsers').disabled=false; }
   }
 
-  function mediaMarkup(asset, userId, downloadId) {
-    if (!asset.available) {
-      return `<div class="notice">⚠️ Video fayli server arxivida topilmadi. Manba: ${escapeHtml(asset.name || "fayl nomi yo‘q")}</div>`;
-    }
-    return `
-      <button class="btn primary show-media" data-asset="${escapeHtml(asset.id)}">▶ Videoni ko‘rsatish</button>
-      <div class="media-result" id="media-${escapeHtml(asset.id)}"></div>`;
-  }
-
-  async function loadMedia(assetId, container) {
-    container.innerHTML = `<div class="loading">Video yuklanmoqda...</div>`;
+  function platformOf(item) { const raw=String(first(item,['platform'],'other')).toLowerCase(); if(raw.includes('insta'))return 'instagram'; if(raw.includes('youtube')||raw.includes('youtu'))return 'youtube'; if(raw.includes('tiktok'))return 'tiktok'; return 'other'; }
+  function mediaKind(item) { const raw=String(first(item,['media_type'],'')).toLowerCase(); if(raw.includes('video')||raw.includes('mp4')||raw.includes('mov')||raw.includes('webm'))return 'video'; if(raw.includes('image')||raw.includes('photo')||raw.includes('jpg')||raw.includes('png')||raw.includes('webp'))return 'image'; return 'other'; }
+  async function loadGallery(platform=selectedPlatform) {
+    selectedPlatform=platform; document.querySelectorAll('.platform').forEach(b=>b.classList.toggle('active',b.dataset.platform===platform));
+    $('galleryTitle').textContent=platformNames[platform]||'Media galereyasi'; $('gallerySubtitle').textContent=platform==='all'?'Arxivdagi barcha saqlangan media':`${platformNames[platform]||platform} platformasidan saqlangan media`;
+    $('galleryStatus').className='status'; $('galleryStatus').textContent='Galereya yuklanmoqda…'; $('gallery').replaceChildren(); $('galleryCount').textContent='…'; $('refreshGallery').disabled=true;
     try {
-      const response = await api(`/api/media/${encodeURIComponent(assetId)}`);
-      const blob = await response.blob();
-      const url = URL.createObjectURL(blob);
-      const type = blob.type || response.headers.get("content-type") || "";
-
-      if (type.startsWith("image/")) {
-        container.innerHTML = `<img class="media-image" alt="Yuklangan rasm" src="${url}">`;
-      } else if (type.startsWith("video/") || type === "application/octet-stream") {
-        container.innerHTML = `
-          <video class="media-player" controls playsinline preload="metadata">
-            <source src="${url}" type="${escapeHtml(type)}">
-            Brauzer ushbu videoni ijro eta olmaydi.
-          </video>`;
-      } else {
-        container.innerHTML = `<div class="notice">Fayl olindi, lekin brauzerda ko‘rsatish formati aniqlanmadi (${escapeHtml(type)}).</div>
-          <a class="btn" href="${url}" download="savebot-media">Faylni yuklab olish</a>`;
+      const r=await request(`/api/gallery?platform=${encodeURIComponent(platform)}`), data=await r.json();
+      mediaItems=Array.isArray(data.media)?data.media:[];
+      $('galleryCount').textContent=`${fmt(data.count ?? mediaItems.length)} ta`;
+      $('count-all').textContent=`${fmt(mediaItems.length)} ta media`;
+      // Counts for each platform are filled from the all-media response when available.
+      if(platform==='all'){
+        for(const p of ['instagram','youtube','tiktok','other']){const c=mediaItems.filter(x=>platformOf(x)===p).length;const label=$(p==='other'?'count-other':`count-${p}`);if(label)label.textContent=`${fmt(c)} ta media`;}
       }
-    } catch (error) {
-      container.innerHTML = `<div class="notice">Videoni olib bo‘lmadi: ${escapeHtml(error.message)}. Railway Logs bo‘limini tekshiring.</div>`;
-    }
+      $('galleryStatus').classList.add('hidden'); renderGallery();
+    } catch(e) { mediaItems=[]; $('galleryCount').textContent='—'; $('galleryStatus').className='status error'; $('galleryStatus').textContent=e.message||'Galereyani yuklashda xatolik.'; }
+    finally { $('refreshGallery').disabled=false; }
   }
-
-  function renderHistory(items, targetId) {
-    const target = $(targetId);
-    if (!items || !items.length) {
-      target.innerHTML = `<div class="empty">Bu foydalanuvchida yuklamalar tarixi topilmadi.</div>`;
-      return;
-    }
-
-    target.innerHTML = items.map(item => {
-      const media = Array.isArray(item.media) ? item.media : [];
-      const mediaHtml = media.length ? media.map(asset => mediaMarkup(asset, currentHistoryUser, item.id)).join("") :
-        `<div class="muted small">Arxivlangan media fayl qayd etilmagan.</div>`;
-
-      return `
-        <article class="history-item">
-          <strong>${platformIcon(item.platform)} ${escapeHtml(platformName(item.platform))}</strong>
-          <span class="muted small"> · ${escapeHtml(dateText(item.timestamp))}</span>
-          <div class="muted small">Holat: ${escapeHtml(item.status || "Noma’lum")} · ID: ${escapeHtml(item.id)}</div>
-          ${item.source_url ? `<a class="history-url" href="${escapeHtml(item.source_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.source_url)}</a>` : ""}
-          ${mediaHtml}
-        </article>`;
-    }).join("");
-
-    target.querySelectorAll(".show-media").forEach(button => {
-      button.addEventListener("click", async () => {
-        const container = $("media-" + button.dataset.asset);
-        if (!container) return;
-        button.disabled = true;
-        await loadMedia(button.dataset.asset, container);
-        button.disabled = false;
-      });
+  function revokeOldUrls(card) { card.querySelectorAll('video').forEach(v=>{try{v.pause();}catch(_){} if(v.dataset.objectUrl){URL.revokeObjectURL(v.dataset.objectUrl);blobUrls.delete(v.dataset.objectUrl);}}); }
+  function renderGallery() {
+    const query=$('gallerySearch').value.trim().toLocaleLowerCase(), type=$('mediaType').value;
+    const filtered=mediaItems.filter(item=>{
+      const text=[item.original_name,item.username,item.full_name,item.user_id,item.platform,item.source_url,item.download_id].join(' ').toLocaleLowerCase();
+      return (!query||text.includes(query))&&(type==='all'||mediaKind(item)===type);
+    });
+    const container=$('gallery'); container.replaceChildren();
+    if(!filtered.length){container.append(node('div','empty',mediaItems.length?'Filtr bo‘yicha media topilmadi.':'Bu bo‘limda saqlangan media topilmadi.'));return;}
+    filtered.forEach(item=>{
+      const card=node('article','media-card'), preview=node('div','preview');
+      const available=item.available!==false && item.asset_id!==undefined && item.asset_id!==null;
+      if(available && mediaKind(item)==='video'){
+        const placeholder=node('div','preview-placeholder'); placeholder.append(node('div','play-symbol','▶'),node('div','','Videoni ochish uchun bosing')); preview.append(placeholder);
+        placeholder.style.cursor='pointer'; placeholder.addEventListener('click',()=>playInline(item,preview,placeholder));
+      } else if(available && mediaKind(item)==='image'){
+        const placeholder=node('div','preview-placeholder');placeholder.append(node('div','play-symbol','▧'),node('div','','Rasm fayli'));preview.append(placeholder);
+        placeholder.style.cursor='pointer';placeholder.addEventListener('click',()=>playInline(item,preview,placeholder));
+      } else {
+        const ph=node('div','preview-placeholder'); ph.append(node('div','play-symbol',available?'▶':'!'),node('div',available?'':'unavailable',available?'Media faylini ochish':'Fayl mavjud emas')); preview.append(ph);
+      }
+      const info=node('div','media-info'); info.append(node('div','tag',platformNames[platformOf(item)]||String(item.platform||'Boshqa')));
+      info.append(node('div','media-title',first(item,['original_name'],'Nomsiz fayl')));
+      const who=first(item,['full_name'],'') || (item.username?('@'+String(item.username).replace(/^@/,'')):`ID ${fmt(item.user_id)}`);
+      info.append(node('div','media-meta',`👤 ${who}`));
+      info.append(node('div','media-meta',`🕒 ${dateText(item.timestamp)} · Yuklama #${fmt(item.download_id)}`));
+      const actions=node('div','media-actions');
+      if(available){const open=node('button','btn','▶ Ko‘rish');open.type='button';open.addEventListener('click',()=>playInline(item,preview,preview.querySelector('.preview-placeholder')));actions.append(open);}
+      const source=safeSource(item.source_url); if(source){const link=node('a','btn secondary','↗ Manba');link.href=source;link.target='_blank';link.rel='noopener noreferrer';actions.append(link);}
+      info.append(actions);card.append(preview,info);container.append(card);
     });
   }
-
-  async function openHistory(userId) {
-    currentHistoryUser = userId;
-    showPage("history");
-    $("historyTitle").textContent = "Yuklamalar tarixi";
-    const user = allUsers.find(u => String(u.user_id) === String(userId));
-    $("historySubtitle").textContent = `${user?.full_name || "Foydalanuvchi"} · Telegram ID: ${userId}`;
-    $("historyList").innerHTML = `<div class="loading">Tarix yuklanmoqda...</div>`;
-
+  async function playInline(item, preview, placeholder) {
+    if(preview.querySelector('video')){const existing=preview.querySelector('video');existing.play().catch(()=>{});return;}
+    if(!item.asset_id){alert('Media ID topilmadi.');return;}
+    if(placeholder){placeholder.textContent='Video yuklanmoqda…';placeholder.style.cursor='default';}
     try {
-      const response = await api(`/api/users/${encodeURIComponent(userId)}/downloads`);
-      const data = await response.json();
-      renderHistory(data.downloads || [], "historyList");
-    } catch (error) {
-      $("historyList").innerHTML = `<div class="notice">Tarixni yuklab bo‘lmadi: ${escapeHtml(error.message)}</div>`;
+      const r=await request(`/api/media/${encodeURIComponent(item.asset_id)}`), blob=await r.blob();
+      if(!blob.size)throw new Error('Media fayli bo‘sh.');
+      const url=URL.createObjectURL(blob);blobUrls.add(url);
+      if(mediaKind(item)==='image'){
+        const img=node('img');img.src=url;img.alt=String(item.original_name||'Saqlangan rasm');img.style.cssText='width:100%;height:100%;object-fit:contain;background:#05070a';img.onload=()=>{};preview.replaceChildren(img);return;
+      }
+      const video=node('video');video.controls=true;video.playsInline=true;video.preload='metadata';video.src=url;video.dataset.objectUrl=url;
+      video.addEventListener('error',()=>{const msg=node('div','preview-placeholder unavailable','Videoni ijro qilib bo‘lmadi. Fayl formati yoki arxivni tekshiring.');preview.replaceChildren(msg);});
+      preview.replaceChildren(video); video.play().catch(()=>{});
+    } catch(e) {
+      if(placeholder){placeholder.className='preview-placeholder unavailable';placeholder.textContent=e.message||'Media ochilmadi.';placeholder.style.cursor='pointer';placeholder.addEventListener('click',()=>playInline(item,preview,placeholder),{once:true});}
+      else alert(e.message||'Media ochilmadi.');
     }
   }
 
-  $("backToUsers").onclick = () => showPage("users");
-
-  $("downloadsSearch").addEventListener("input", e => {
-    const q = e.target.value.toLowerCase().trim();
-    document.querySelectorAll("#allDownloads .history-item").forEach(item => {
-      item.classList.toggle("hidden", !item.textContent.toLowerCase().includes(q));
+  function renderUsers() {
+    const q=$('userSearch').value.trim().toLocaleLowerCase();const filtered=users.filter(u=>`${userName(u)} ${userId(u)} ${first(u,['username'],'')}`.toLocaleLowerCase().includes(q));
+    const container=$('users');container.replaceChildren();
+    if(!filtered.length){container.append(node('div','empty',q?'Qidiruv bo‘yicha foydalanuvchi topilmadi.':'Foydalanuvchilar ro‘yxati bo‘sh.'));return;}
+    filtered.forEach(u=>{
+      const card=node('article','user'), name=userName(u), avatar=node('div','avatar',name.trim().slice(0,1).toUpperCase()||'U'), info=node('div','user-info');
+      info.append(node('div','user-name',name));const username=first(u,['username'],'');info.append(node('div','user-meta',`${username?'@'+String(username).replace(/^@/,'')+' · ':''}ID: ${fmt(userId(u))}`));
+      const count=first(u,['download_count','downloads_count','total_downloads','downloads'],null);if(count!==null&&typeof count!=='object')info.append(node('div','user-meta',`Yuklamalar: ${fmt(count)}`));
+      const last=first(u,['last_download'],'');if(last)info.append(node('div','user-meta',`Oxirgi yuklama: ${dateText(last)}`));
+      const btn=node('button','btn','Tarix');btn.type='button';btn.addEventListener('click',()=>openHistory(u));card.append(avatar,info,btn);container.append(card);
     });
-  });
+  }
+  async function openHistory(user) {
+    const id=userId(user);if(id===''){alert('Foydalanuvchi ID raqami topilmadi.');return;}selectedUser=user;
+    $('usersSection').classList.add('hidden');$('historySection').classList.remove('hidden');$('historyTitle').textContent=userName(user);$('historyMeta').textContent=`Telegram ID: ${id}`;
+    const container=$('downloads');container.replaceChildren(node('div','status','Yuklamalar tarixi yuklanmoqda…'));
+    try {
+      const r=await request(`/api/users/${encodeURIComponent(id)}/downloads`),data=await r.json(),rows=Array.isArray(data.downloads)?data.downloads:[];container.replaceChildren();
+      if(!rows.length){container.append(node('div','empty','Bu foydalanuvchining yuklamalari topilmadi.'));return;}
+      rows.forEach(item=>{
+        const card=node('article','download');card.append(node('div','download-title',first(item,['title','original_name','filename','file_name','source_url','url'],'Media fayl')));
+        const platform=first(item,['platform'],'');const date=first(item,['timestamp','downloaded_at','created_at','date'],'');card.append(node('div','download-meta',[platform,date?dateText(date):'',item.id!==undefined?`ID: ${item.id}`:''].filter(Boolean).join(' · ')||'Yuklama ma’lumoti'));
+        const actions=node('div','actions');const media=Array.isArray(item.media)?item.media:[];
+        media.forEach(asset=>{if(asset.available&&asset.id!==undefined){const b=node('button','btn','▶ Media ko‘rish');b.type='button';b.addEventListener('click',async()=>{try{const res=await request(`/api/media/${encodeURIComponent(asset.id)}`),blob=await res.blob(),url=URL.createObjectURL(blob);blobUrls.add(url);const win=window.open(url,'_blank');if(!win){const a=node('a');a.href=url;a.download=asset.name||'media';a.click();}}catch(e){alert(e.message||'Media ochilmadi.');}});actions.append(b);}});
+        const src=safeSource(first(item,['source_url','url','original_url'],''));if(src){const a=node('a','btn secondary','↗ Manba');a.href=src;a.target='_blank';a.rel='noopener noreferrer';actions.append(a);}if(actions.childElementCount)card.append(actions);container.append(card);
+      });
+    } catch(e){container.replaceChildren(node('div','status error',e.message||'Tarixni yuklashda xatolik.'));}
+    $('historySection').scrollIntoView({behavior:'smooth',block:'start'});
+  }
 
-  // The download history API is scoped to one user; select a user to load it.
-  $("allDownloads").innerHTML = `
-    <div class="notice">Yuklamalar ro‘yxatini ko‘rish uchun “Foydalanuvchilar” bo‘limida foydalanuvchining “Tarix” tugmasini bosing. Har bir yozuv ichida video pleyer mavjud.</div>
-    <button class="btn primary" id="chooseUserForDownloads">Foydalanuvchini tanlash</button>`;
-  $("chooseUserForDownloads").onclick = () => showPage("users");
-
-  loadDashboard();
+  document.querySelectorAll('.platform').forEach(b=>b.addEventListener('click',()=>loadGallery(b.dataset.platform)));
+  $('refreshGallery').addEventListener('click',()=>loadGallery(selectedPlatform));$('gallerySearch').addEventListener('input',renderGallery);$('mediaType').addEventListener('change',renderGallery);
+  $('userSearch').addEventListener('input',renderUsers);$('refreshUsers').addEventListener('click',loadDashboard);
+  $('backToUsers').addEventListener('click',()=>{$('historySection').classList.add('hidden');$('usersSection').classList.remove('hidden');$('usersSection').scrollIntoView({behavior:'smooth',block:'start'});});
+  loadDashboard();loadGallery('all');
 })();
 </script>
 </body>
