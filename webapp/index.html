@@ -10,13 +10,13 @@
   <style>
     :root {
       color-scheme: dark;
-      --bg: var(--tg-theme-bg-color, #101720);
-      --panel: var(--tg-theme-secondary-bg-color, #202c3b);
-      --panel2: #273548;
-      --text: var(--tg-theme-text-color, #f5f7fb);
-      --muted: var(--tg-theme-hint-color, #94a6bf);
+      --bg: var(--tg-theme-bg-color, #0d1119);
+      --panel: var(--tg-theme-secondary-bg-color, #171d29);
+      --panel2: #1d2534;
+      --text: var(--tg-theme-text-color, #f4f6fb);
+      --muted: var(--tg-theme-hint-color, #9aa7bb);
       --accent: var(--tg-theme-button-color, #548fca);
-      --line: rgba(160,176,204,.18);
+      --line: rgba(160,176,204,.16);
       --danger: #ff7188;
       --good: #4bd5a2;
       --radius: 17px;
@@ -97,7 +97,6 @@
     }
 
     .dot.bad { background: var(--danger); }
-
     .section { margin-top: 23px; }
 
     .section-head {
@@ -234,14 +233,12 @@
       min-width: 0;
       display: flex;
       flex-direction: column;
-      align-self: start;
       overflow: hidden;
       background: var(--panel);
       border: 1px solid var(--line);
       border-radius: 17px;
     }
 
-    /* Video va uning ma'lumotlari alohida bloklarda */
     .preview {
       position: relative;
       display: flex;
@@ -309,13 +306,6 @@
       font-weight: 750;
     }
 
-    .media-title {
-      font-size: 13px;
-      font-weight: 750;
-      overflow-wrap: anywhere;
-      word-break: break-word;
-    }
-
     .media-meta {
       margin-top: 5px;
       color: var(--muted);
@@ -371,8 +361,12 @@
       border-radius: 15px;
     }
 
-    .download-title { font-weight: 750; overflow-wrap: anywhere; }
-    .download-meta { margin: 5px 0 10px; color: var(--muted); font-size: 11px; overflow-wrap: anywhere; }
+    .download-meta {
+      margin: 5px 0 10px;
+      color: var(--muted);
+      font-size: 11px;
+      overflow-wrap: anywhere;
+    }
 
     .history-media-grid {
       display: grid;
@@ -414,15 +408,6 @@
       background: #05070a;
     }
 
-    .history-media-name {
-      padding: 8px;
-      color: var(--muted);
-      font-size: 11px;
-      overflow-wrap: anywhere;
-    }
-
-    .actions { display: flex; gap: 8px; flex-wrap: wrap; }
-
     .status, .empty {
       padding: 22px 15px;
       text-align: center;
@@ -435,7 +420,13 @@
     .status.error { color: var(--danger); white-space: pre-wrap; overflow-wrap: anywhere; }
     .unavailable { color: var(--danger); font-size: 12px; }
     .hidden { display: none !important; }
-    .foot { margin-top: 27px; color: var(--muted); font-size: 11px; text-align: center; }
+
+    .foot {
+      margin-top: 27px;
+      color: var(--muted);
+      font-size: 11px;
+      text-align: center;
+    }
 
     @media (max-width: 760px) {
       .gallery { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -502,36 +493,51 @@
       <div class="section-head">
         <div>
           <h2>Media galereyasi</h2>
-          <p>Platformani tanlang — saqlangan videolar ochiladi</p>
+          <p>Platformani tanlang — saqlangan media ko‘rinadi</p>
         </div>
         <button class="btn secondary" id="refreshGallery" type="button">↻ Yangilash</button>
       </div>
 
-      <div class="platforms" id="platforms">
+      <div class="platforms">
         <button class="platform active" data-platform="all" type="button">
           <span class="platform-icon">🗂️</span>
-          <span><span class="platform-name">Barchasi</span><br><span class="platform-count" id="count-all">Barcha media</span></span>
+          <span>
+            <span class="platform-name">Barchasi</span><br>
+            <span class="platform-count" id="count-all">Media</span>
+          </span>
         </button>
         <button class="platform" data-platform="instagram" type="button">
           <span class="platform-icon">📸</span>
-          <span><span class="platform-name">Instagram</span><br><span class="platform-count" id="count-instagram">Media</span></span>
+          <span>
+            <span class="platform-name">Instagram</span><br>
+            <span class="platform-count" id="count-instagram">Media</span>
+          </span>
         </button>
         <button class="platform" data-platform="youtube" type="button">
           <span class="platform-icon">▶️</span>
-          <span><span class="platform-name">YouTube</span><br><span class="platform-count" id="count-youtube">Media</span></span>
+          <span>
+            <span class="platform-name">YouTube</span><br>
+            <span class="platform-count" id="count-youtube">Media</span>
+          </span>
         </button>
         <button class="platform" data-platform="tiktok" type="button">
           <span class="platform-icon">🎵</span>
-          <span><span class="platform-name">TikTok</span><br><span class="platform-count" id="count-tiktok">Media</span></span>
+          <span>
+            <span class="platform-name">TikTok</span><br>
+            <span class="platform-count" id="count-tiktok">Media</span>
+          </span>
         </button>
         <button class="platform" data-platform="other" type="button">
           <span class="platform-icon">🌐</span>
-          <span><span class="platform-name">Boshqa</span><br><span class="platform-count" id="count-other">Media</span></span>
+          <span>
+            <span class="platform-name">Boshqa</span><br>
+            <span class="platform-count" id="count-other">Media</span>
+          </span>
         </button>
       </div>
 
       <div class="toolbar" style="margin-top:14px">
-        <input id="gallerySearch" class="search" type="search" placeholder="Fayl nomi yoki foydalanuvchi bo‘yicha qidirish…">
+        <input id="gallerySearch" class="search" type="search" placeholder="Foydalanuvchi yoki ID bo‘yicha qidirish…">
         <select id="mediaType" class="select">
           <option value="all">Barcha media</option>
           <option value="video">Videolar</option>
@@ -582,7 +588,6 @@
   }
 
   const $ = id => document.getElementById(id);
-  const blobUrls = new Set();
 
   let users = [];
   let mediaItems = [];
@@ -621,15 +626,14 @@
   }
 
   function userName(user) {
-    return String(
-      first(user, ['full_name', 'name', 'first_name', 'username'], `ID ${userId(user)}`)
-    );
+    return String(first(user, ['full_name', 'name', 'first_name', 'username'], `ID ${userId(user)}`));
   }
 
   function dateText(value) {
     if (!value) return 'Sana noma’lum';
     const date = new Date(value);
     if (Number.isNaN(date.getTime())) return String(value);
+
     return date.toLocaleString('uz-UZ', {
       day: '2-digit',
       month: '2-digit',
@@ -650,9 +654,11 @@
 
   function platformOf(item) {
     const value = String(item.platform || '').toLowerCase();
+
     if (value.includes('instagram')) return 'instagram';
     if (value.includes('youtube') || value.includes('youtu.be')) return 'youtube';
     if (value.includes('tiktok')) return 'tiktok';
+
     return 'other';
   }
 
@@ -660,9 +666,14 @@
     const type = String(first(item, ['media_type', 'type'], '')).toLowerCase();
     const name = String(first(item, ['original_name', 'file_name', 'name'], '')).toLowerCase();
 
-    if (type.includes('image') || type.includes('photo') || /\.(png|jpe?g|webp|gif|bmp|avif)$/i.test(name)) {
+    if (
+      type.includes('image') ||
+      type.includes('photo') ||
+      /\.(png|jpe?g|webp|gif|bmp|avif)$/i.test(name)
+    ) {
       return 'image';
     }
+
     return 'video';
   }
 
@@ -679,10 +690,12 @@
 
     if (!response.ok) {
       let message = `Server xatosi: ${response.status}`;
+
       try {
         const data = await response.json();
         message = data.detail || data.message || message;
       } catch {}
+
       throw new Error(message);
     }
 
@@ -696,6 +709,7 @@
 
   async function loadDashboard() {
     $('status').classList.remove('hidden');
+    $('status').classList.remove('error');
     $('status').textContent = 'Admin ma’lumotlari yuklanmoqda…';
 
     try {
@@ -708,17 +722,10 @@
 
       users = Array.isArray(data.users) ? data.users : [];
 
-      if (!users.length) {
-        try {
-          const usersResponse = await request('/api/users');
-          const usersData = await usersResponse.json();
-          users = Array.isArray(usersData) ? usersData : (usersData.users || []);
-        } catch {}
-      }
-
-      renderUsers();
       $('app').classList.remove('hidden');
       $('status').classList.add('hidden');
+
+      renderUsers();
       setConnection(true, 'Ulandi');
     } catch (error) {
       $('status').classList.remove('hidden');
@@ -744,36 +751,26 @@
       const data = await response.json();
 
       mediaItems = Array.isArray(data.media) ? data.media : [];
-      $('galleryStatus').classList.add('hidden');
 
+      $('galleryStatus').classList.add('hidden');
       renderGallery();
-      updatePlatformCounts();
+
+      $('count-all').textContent = `${data.count ?? mediaItems.length} ta media`;
+
+      if (platform === 'all') {
+        for (const p of ['instagram', 'youtube', 'tiktok', 'other']) {
+          const count = mediaItems.filter(item => platformOf(item) === p).length;
+          const label = $(`count-${p}`);
+          if (label) label.textContent = `${count} ta media`;
+        }
+      } else {
+        const label = $(`count-${platform}`);
+        if (label) label.textContent = `${data.count ?? mediaItems.length} ta media`;
+      }
     } catch (error) {
       $('galleryStatus').classList.remove('hidden');
       $('galleryStatus').classList.add('error');
       $('galleryStatus').textContent = 'Galereyani yuklab bo‘lmadi.\n' + error.message;
-    }
-  }
-
-  async function updatePlatformCounts() {
-    const platforms = ['all', 'instagram', 'youtube', 'tiktok', 'other'];
-
-    for (const platform of platforms) {
-      try {
-        let items = mediaItems;
-
-        if (platform !== selectedPlatform) {
-          const response = await request(`/api/gallery?platform=${encodeURIComponent(platform)}`);
-          const data = await response.json();
-          items = Array.isArray(data.media) ? data.media : [];
-        }
-
-        const countEl = $(`count-${platform}`);
-        if (countEl) countEl.textContent = `${items.length} ta media`;
-      } catch {
-        const countEl = $(`count-${platform}`);
-        if (countEl && !countEl.textContent) countEl.textContent = 'Media';
-      }
     }
   }
 
@@ -783,16 +780,16 @@
 
     const filtered = mediaItems.filter(item => {
       const searchable = [
-        first(item, ['original_name'], ''),
-        first(item, ['username'], ''),
-        first(item, ['full_name'], ''),
-        first(item, ['user_id'], ''),
-        first(item, ['download_id'], ''),
-        first(item, ['platform'], '')
+        item.username,
+        item.full_name,
+        item.user_id,
+        item.platform,
+        item.download_id
       ].join(' ').toLocaleLowerCase();
 
       if (query && !searchable.includes(query)) return false;
       if (typeFilter !== 'all' && mediaKind(item) !== typeFilter) return false;
+
       return true;
     });
 
@@ -813,41 +810,68 @@
     filtered.forEach(item => {
       const card = node('article', 'media-card');
       const preview = node('div', 'preview');
-      const available = item.available !== false && item.asset_id !== undefined && item.asset_id !== null;
+
+      const available = item.available !== false &&
+        item.asset_id !== undefined &&
+        item.asset_id !== null;
 
       if (available) {
-        const placeholder = node(
-          'div',
-          'preview-placeholder',
-          mediaKind(item) === 'image' ? 'Rasmni ochish uchun bosing' : 'Videoni ko‘rish uchun bosing'
+        const placeholder = node('div', 'preview-placeholder');
+        placeholder.append(
+          node('div', 'play-symbol', mediaKind(item) === 'image' ? '▧' : '▶'),
+          node('div', '', mediaKind(item) === 'image' ? 'Rasmni ko‘rish' : 'Videoni ko‘rish')
         );
-        placeholder.append(node('div', 'play-symbol', mediaKind(item) === 'image' ? '▧' : '▶'));
+
         preview.append(placeholder);
-        placeholder.addEventListener('click', () => playInline(item, preview, placeholder));
+        placeholder.addEventListener('click', () => loadGalleryMedia(item, preview));
+
+        if ('IntersectionObserver' in window) {
+          const observer = new IntersectionObserver(entries => {
+            if (entries.some(entry => entry.isIntersecting)) {
+              observer.disconnect();
+              loadGalleryThumbnail(item, preview);
+            }
+          }, { rootMargin: '180px' });
+
+          observer.observe(preview);
+        } else {
+          loadGalleryThumbnail(item, preview);
+        }
       } else {
         preview.append(node('div', 'preview-placeholder unavailable', 'Fayl mavjud emas'));
       }
 
       const info = node('div', 'media-info');
-      info.append(node('div', 'tag', platformNames[platformOf(item)] || String(item.platform || 'Boshqa')));
-      info.append(node('div', 'media-title', first(item, ['original_name'], 'Nomsiz fayl')));
+
+      info.append(node(
+        'div',
+        'tag',
+        platformNames[platformOf(item)] || String(item.platform || 'Boshqa')
+      ));
 
       const who = first(item, ['full_name'], '') ||
-        (item.username ? '@' + String(item.username).replace(/^@/, '') : `ID ${fmt(item.user_id)}`);
+        (item.username
+          ? '@' + String(item.username).replace(/^@/, '')
+          : `ID ${fmt(item.user_id)}`);
 
       info.append(node('div', 'media-meta', `👤 ${who}`));
-      info.append(node('div', 'media-meta', `🕒 ${dateText(item.timestamp)} · Yuklama #${fmt(item.download_id)}`));
+      info.append(node(
+        'div',
+        'media-meta',
+        `🕒 ${dateText(item.timestamp)} · Yuklama #${fmt(item.download_id)}`
+      ));
 
       const actions = node('div', 'media-actions');
 
       if (available) {
-        const openButton = node('button', 'btn', mediaKind(item) === 'image' ? '▧ Ko‘rish' : '▶ Ko‘rish');
+        const openButton = node('button', 'btn', '▶ Ko‘rish');
         openButton.type = 'button';
-        openButton.addEventListener('click', () => playInline(item, preview, preview.querySelector('.preview-placeholder')));
+        openButton.addEventListener('click', () => loadGalleryMedia(item, preview));
         actions.append(openButton);
       }
 
       const source = safeSource(item.source_url);
+
       if (source) {
         const link = node('a', 'btn secondary', '↗ Manba');
         link.href = source;
@@ -862,24 +886,12 @@
     });
   }
 
-  async function playInline(item, preview, placeholder) {
-    const existing = preview.querySelector('video');
-    if (existing) {
-      existing.play().catch(() => {});
-      return;
-    }
+  async function loadGalleryThumbnail(item, preview) {
+    if (preview.dataset.loading === '1') return;
+    if (preview.querySelector('video, img')) return;
+    if (!item.asset_id || item.available === false) return;
 
-    if (preview.querySelector('img')) return;
-
-    if (!item.asset_id) {
-      alert('Media ID topilmadi.');
-      return;
-    }
-
-    if (placeholder) {
-      placeholder.textContent = 'Media yuklanmoqda…';
-      placeholder.style.cursor = 'default';
-    }
+    preview.dataset.loading = '1';
 
     try {
       const response = await request(`/api/media/${encodeURIComponent(item.asset_id)}`);
@@ -888,12 +900,73 @@
       if (!blob.size) throw new Error('Media fayli bo‘sh.');
 
       const url = URL.createObjectURL(blob);
-      blobUrls.add(url);
 
       if (mediaKind(item) === 'image') {
         const img = node('img');
         img.src = url;
-        img.alt = String(item.original_name || 'Saqlangan rasm');
+        img.alt = 'Media preview';
+        preview.replaceChildren(img);
+        return;
+      }
+
+      const video = node('video');
+      video.muted = true;
+      video.playsInline = true;
+      video.preload = 'metadata';
+      video.controls = true;
+      video.src = url;
+
+      video.addEventListener('loadeddata', () => {
+        try {
+          if (video.duration > 0) {
+            video.currentTime = Math.min(0.1, video.duration / 2);
+          }
+        } catch {}
+      }, { once: true });
+
+      video.addEventListener('seeked', () => {
+        video.pause();
+      }, { once: true });
+
+      video.addEventListener('error', () => {
+        preview.replaceChildren(node('div', 'preview-placeholder unavailable', 'Videoni yuklab bo‘lmadi.'));
+      });
+
+      preview.replaceChildren(video);
+    } catch {
+      preview.dataset.thumbnailError = '1';
+    }
+  }
+
+  async function loadGalleryMedia(item, preview) {
+    const existingVideo = preview.querySelector('video');
+
+    if (existingVideo) {
+      existingVideo.controls = true;
+      existingVideo.muted = false;
+      existingVideo.play().catch(() => {});
+      return;
+    }
+
+    if (!item.asset_id) {
+      alert('Media ID topilmadi.');
+      return;
+    }
+
+    preview.replaceChildren(node('div', 'preview-placeholder', 'Media yuklanmoqda…'));
+
+    try {
+      const response = await request(`/api/media/${encodeURIComponent(item.asset_id)}`);
+      const blob = await response.blob();
+
+      if (!blob.size) throw new Error('Media fayli bo‘sh.');
+
+      const url = URL.createObjectURL(blob);
+
+      if (mediaKind(item) === 'image') {
+        const img = node('img');
+        img.src = url;
+        img.alt = 'Saqlangan rasm';
         preview.replaceChildren(img);
         return;
       }
@@ -905,21 +978,21 @@
       video.src = url;
 
       video.addEventListener('error', () => {
-        preview.replaceChildren(node('div', 'preview-placeholder unavailable', 'Videoni ijro qilib bo‘lmadi. Arxiv yoki fayl formatini tekshiring.'));
+        preview.replaceChildren(node(
+          'div',
+          'preview-placeholder unavailable',
+          'Videoni ijro qilib bo‘lmadi. Arxiv yoki fayl formatini tekshiring.'
+        ));
       });
 
       preview.replaceChildren(video);
       video.play().catch(() => {});
     } catch (error) {
-      const message = error.message || 'Media ochilmadi.';
-      if (placeholder) {
-        placeholder.className = 'preview-placeholder unavailable';
-        placeholder.textContent = message;
-        placeholder.style.cursor = 'pointer';
-        placeholder.addEventListener('click', () => playInline(item, preview, placeholder), { once: true });
-      } else {
-        alert(message);
-      }
+      preview.replaceChildren(node(
+        'div',
+        'preview-placeholder unavailable',
+        error.message || 'Media ochilmadi.'
+      ));
     }
   }
 
@@ -935,7 +1008,11 @@
     container.replaceChildren();
 
     if (!filtered.length) {
-      container.append(node('div', 'empty', query ? 'Qidiruv bo‘yicha foydalanuvchi topilmadi.' : 'Foydalanuvchilar ro‘yxati bo‘sh.'));
+      container.append(node(
+        'div',
+        'empty',
+        query ? 'Qidiruv bo‘yicha foydalanuvchi topilmadi.' : 'Foydalanuvchilar ro‘yxati bo‘sh.'
+      ));
       return;
     }
 
@@ -948,15 +1025,23 @@
       info.append(node('div', 'user-name', name));
 
       const username = first(user, ['username'], '');
-      info.append(node('div', 'user-meta', `${username ? '@' + String(username).replace(/^@/, '') + ' · ' : ''}ID: ${fmt(userId(user))}`));
+      info.append(node(
+        'div',
+        'user-meta',
+        `${username ? '@' + String(username).replace(/^@/, '') + ' · ' : ''}ID: ${fmt(userId(user))}`
+      ));
 
       const count = first(user, ['download_count', 'downloads_count', 'total_downloads', 'downloads'], null);
+
       if (count !== null && typeof count !== 'object') {
         info.append(node('div', 'user-meta', `Yuklamalar: ${fmt(count)}`));
       }
 
       const last = first(user, ['last_download'], '');
-      if (last) info.append(node('div', 'user-meta', `Oxirgi yuklama: ${dateText(last)}`));
+
+      if (last) {
+        info.append(node('div', 'user-meta', `Oxirgi yuklama: ${dateText(last)}`));
+      }
 
       const button = node('button', 'btn', 'Tarix');
       button.type = 'button';
@@ -970,8 +1055,6 @@
   async function loadHistoryAsset(asset, preview) {
     if (preview.dataset.loading === '1') return;
 
-    if (preview.querySelector('video') || preview.querySelector('img')) return;
-
     preview.dataset.loading = '1';
     preview.replaceChildren(node('div', 'preview-placeholder', 'Media yuklanmoqda…'));
 
@@ -982,16 +1065,16 @@
       if (!blob.size) throw new Error('Media fayli bo‘sh.');
 
       const url = URL.createObjectURL(blob);
-      blobUrls.add(url);
       preview.replaceChildren();
 
-      const type = String(asset.type || '').toLowerCase();
-      const name = String(asset.name || '');
+      const isImage =
+        String(asset.type || '').toLowerCase().includes('image') ||
+        /\.(png|jpe?g|webp|gif|bmp|avif)$/i.test(asset.name || '');
 
-      if (type.includes('image') || type.includes('photo') || /\.(png|jpe?g|webp|gif|bmp|avif)$/i.test(name)) {
+      if (isImage) {
         const img = node('img');
         img.src = url;
-        img.alt = name || 'Saqlangan rasm';
+        img.alt = 'Saqlangan rasm';
         preview.append(img);
       } else {
         const video = node('video');
@@ -1005,10 +1088,13 @@
         });
 
         preview.append(video);
-        video.play().catch(() => {});
       }
     } catch (error) {
-      preview.replaceChildren(node('div', 'preview-placeholder unavailable', error.message || 'Media ochilmadi.'));
+      preview.replaceChildren(node(
+        'div',
+        'preview-placeholder unavailable',
+        error.message || 'Media ochilmadi.'
+      ));
       preview.dataset.loading = '0';
     }
   }
@@ -1043,20 +1129,13 @@
 
       rows.forEach(item => {
         const card = node('article', 'download');
-
-        card.append(node(
-          'div',
-          'download-title',
-          first(item, ['title', 'original_name', 'filename', 'file_name', 'source_url', 'url'], 'Media fayl')
-        ));
-
         const platform = first(item, ['platform'], '');
         const date = first(item, ['timestamp', 'downloaded_at', 'created_at', 'date'], '');
 
         card.append(node(
           'div',
           'download-meta',
-          [platform, date ? dateText(date) : '', item.id !== undefined ? `ID: ${item.id}` : '']
+          [platform, date ? dateText(date) : '', item.id !== undefined ? `Yuklama #${item.id}` : '']
             .filter(Boolean).join(' · ') || 'Yuklama ma’lumoti'
         ));
 
@@ -1070,7 +1149,8 @@
             const preview = node('div', 'history-media-preview');
 
             if (asset.available && asset.id !== undefined && asset.id !== null) {
-              const isImage = String(asset.type || '').toLowerCase().includes('image') ||
+              const isImage =
+                String(asset.type || '').toLowerCase().includes('image') ||
                 /\.(png|jpe?g|webp|gif|bmp|avif)$/i.test(asset.name || '');
 
               preview.append(
@@ -1079,24 +1159,35 @@
               );
 
               preview.addEventListener('click', () => loadHistoryAsset(asset, preview));
+
+              if ('IntersectionObserver' in window) {
+                const observer = new IntersectionObserver(entries => {
+                  if (entries.some(entry => entry.isIntersecting)) {
+                    observer.disconnect();
+                    loadHistoryAsset(asset, preview);
+                  }
+                }, { rootMargin: '180px' });
+
+                observer.observe(preview);
+              } else {
+                loadHistoryAsset(asset, preview);
+              }
             } else {
               preview.style.cursor = 'default';
               preview.append(node('div', 'unavailable', 'Fayl mavjud emas'));
             }
 
-            tile.append(
-              preview,
-              node('div', 'history-media-name', asset.name || 'Media fayl')
-            );
-
+            tile.append(preview);
             grid.append(tile);
           });
 
           card.append(grid);
+        } else {
+          card.append(node('div', 'download-meta', 'Media preview mavjud emas.'));
         }
 
         const actions = node('div', 'actions');
-        const source = safeSource(first(item, ['source_url', 'url', 'original_url'], ''));
+        const source = safeSource(first(item, ['source_url', 'url', 'original_url', 'link'], ''));
 
         if (source) {
           const link = node('a', 'btn secondary', '↗ Manba');
@@ -1107,10 +1198,15 @@
         }
 
         if (actions.childElementCount) card.append(actions);
+
         container.append(card);
       });
     } catch (error) {
-      container.replaceChildren(node('div', 'status error', error.message || 'Tarixni yuklashda xatolik.'));
+      container.replaceChildren(node(
+        'div',
+        'status error',
+        error.message || 'Tarixni yuklashda xatolik.'
+      ));
     }
 
     $('historySection').scrollIntoView({ behavior: 'smooth', block: 'start' });
