@@ -1,22 +1,26 @@
+
 <!DOCTYPE html>
 <html lang="uz">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
-  <meta name="theme-color" content="#10131b">
-  <title>Savebot — Admin</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1220">
+  <title>Savebot — Admin panel</title>
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <style>
     :root {
       color-scheme: dark;
-      --bg: var(--tg-theme-bg-color, #10131b);
-      --panel: var(--tg-theme-secondary-bg-color, #191e2a);
-      --text: var(--tg-theme-text-color, #f4f6fb);
-      --muted: var(--tg-theme-hint-color, #9ba6b8);
-      --accent: var(--tg-theme-button-color, #6c63ff);
-      --line: rgba(150,165,190,.18);
-      --danger: #ff647c;
+      --bg: #09111f;
+      --panel: #111d30;
+      --panel2: #17253a;
+      --border: #263750;
+      --text: #f2f6ff;
+      --muted: #8ea5c5;
+      --blue: #2686ff;
+      --purple: #8155ff;
+      --green: #12d69a;
+      --red: #ff5d78;
     }
 
     * { box-sizing: border-box; }
@@ -25,583 +29,831 @@
       margin: 0;
       background: var(--bg);
       color: var(--text);
-      font: 15px/1.45 system-ui, -apple-system, "Segoe UI", sans-serif;
+      font: 14px/1.5 Inter, -apple-system, BlinkMacSystemFont,
+            "Segoe UI", Arial, sans-serif;
     }
 
-    button, input { font: inherit; }
+    button, input, select { font: inherit; }
     button { cursor: pointer; }
 
-    .wrap {
-      max-width: 900px;
-      margin: auto;
-      padding: 18px 14px 36px;
+    .layout { min-height: 100vh; }
+
+    .topbar {
+      height: 76px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 25px;
+      border-bottom: 1px solid var(--border);
+      background: #0d1829;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
 
-    .top, .brand, .section-head, .user, .actions {
+    .brand { display: flex; align-items: center; gap: 13px; }
+
+    .brand-icon {
+      width: 48px;
+      height: 48px;
+      display: grid;
+      place-items: center;
+      border-radius: 15px;
+      background: linear-gradient(135deg, var(--blue), var(--purple));
+      font-size: 25px;
+      font-weight: 800;
+    }
+
+    .brand-name { font-size: 21px; font-weight: 800; }
+    .muted { color: var(--muted); }
+    .small { font-size: 12px; }
+
+    .top-right {
       display: flex;
       align-items: center;
       gap: 12px;
     }
 
-    .top, .section-head {
-      justify-content: space-between;
-    }
-
-    .top { margin-bottom: 18px; }
-
-    .brand { gap: 11px; }
-
-    .logo {
+    .profile {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
       display: grid;
       place-items: center;
-      width: 44px;
-      height: 44px;
-      border-radius: 14px;
-      background: var(--accent);
-      font-size: 20px;
+      background: #4f45a6;
       font-weight: 800;
     }
 
-    .title {
-      font-size: 20px;
-      font-weight: 800;
+    .shell {
+      display: grid;
+      grid-template-columns: 220px minmax(0, 1fr);
+      min-height: calc(100vh - 76px);
     }
 
-    .subtitle, .user-meta, .download-meta, .foot {
-      color: var(--muted);
-      font-size: 12px;
+    aside {
+      background: #0d192a;
+      border-right: 1px solid var(--border);
+      padding: 18px 13px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
     }
 
-    .pill {
-      border: 1px solid var(--line);
-      padding: 6px 9px;
-      border-radius: 20px;
-      color: var(--muted);
-      font-size: 11px;
+    .nav {
+      border: 0;
+      background: transparent;
+      color: #c6d4e9;
+      padding: 13px 14px;
+      border-radius: 12px;
+      text-align: left;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      width: 100%;
     }
+
+    .nav:hover, .nav.active {
+      color: white;
+      background: linear-gradient(110deg, #2788ff, #8155ff);
+    }
+
+    .nav-icon { font-size: 19px; width: 24px; text-align: center; }
+
+    .side-bottom {
+      margin-top: auto;
+      padding: 15px;
+      border: 1px solid var(--border);
+      border-radius: 15px;
+      background: var(--panel);
+    }
+
+    .side-bottom button { width: 100%; margin-top: 12px; }
+
+    main { padding: 20px; min-width: 0; }
+
+    .page { display: none; }
+    .page.active { display: block; }
 
     .stats {
       display: grid;
-      grid-template-columns: repeat(3, minmax(0, 1fr));
-      gap: 10px;
-      margin-bottom: 20px;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 17px;
     }
 
-    .stat, .panel, .user, .download {
-      background: var(--panel);
-      border: 1px solid var(--line);
-      border-radius: 16px;
+    .stat, .card, .platform {
+      border: 1px solid var(--border);
+      background: linear-gradient(145deg, #142239, #101b2d);
+      border-radius: 17px;
     }
 
-    .stat { padding: 14px 12px; }
-
-    .stat .label {
-      color: var(--muted);
-      font-size: 12px;
+    .stat {
+      padding: 18px;
+      min-height: 130px;
     }
 
-    .stat .num {
-      margin-top: 5px;
-      font-size: 25px;
-      font-weight: 800;
-      overflow-wrap: anywhere;
+    .stat-top { display: flex; gap: 12px; align-items: center; }
+
+    .stat-icon {
+      width: 49px;
+      height: 49px;
+      border-radius: 14px;
+      display: grid;
+      place-items: center;
+      font-size: 23px;
+      background: linear-gradient(135deg, #168bff, #5e50fa);
     }
 
-    .section-head { margin: 18px 0 12px; }
-    .section-head h2 { margin: 0; font-size: 17px; }
+    .stat-label { color: #c1d0e7; font-size: 13px; }
+    .stat-number { font-size: 30px; font-weight: 800; margin-top: 7px; }
 
-    .search {
-      width: 100%;
-      padding: 12px 13px;
-      border: 1px solid var(--line);
-      border-radius: 12px;
-      outline: none;
-      background: var(--panel);
-      color: var(--text);
+    .platforms {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 14px;
+      margin-bottom: 18px;
     }
 
-    .search:focus { border-color: var(--accent); }
-
-    .users, .downloads { display: grid; gap: 10px; }
-
-    .user {
-      padding: 13px;
+    .platform {
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
       min-width: 0;
     }
 
-    .avatar {
+    .platform-symbol {
+      width: 46px;
+      height: 46px;
+      border-radius: 13px;
       display: grid;
       place-items: center;
-      flex: 0 0 42px;
-      width: 42px;
-      height: 42px;
-      border-radius: 50%;
-      background: rgba(108,99,255,.2);
-      font-weight: 800;
+      background: #202e45;
+      font-size: 24px;
+      flex-shrink: 0;
     }
 
-    .user-info { flex: 1; min-width: 0; }
-    .user-name, .download-title { font-weight: 700; overflow-wrap: anywhere; }
-    .user-meta { overflow-wrap: anywhere; }
+    .platform strong { display: block; }
+    .platform span { color: var(--muted); font-size: 12px; }
+
+    .content-grid {
+      display: grid;
+      grid-template-columns: minmax(0, 1.7fr) minmax(270px, .9fr);
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .card { padding: 17px; min-width: 0; }
+
+    .card-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 16px;
+    }
+
+    h2 { margin: 0; font-size: 17px; }
+    h3 { margin: 0 0 7px; font-size: 16px; }
 
     .btn {
-      padding: 10px 12px;
-      border: 0;
+      border: 1px solid #30435f;
       border-radius: 11px;
-      background: var(--accent);
+      padding: 10px 13px;
       color: white;
-      font-weight: 700;
-      text-decoration: none;
-      text-align: center;
+      background: #142239;
     }
 
-    .btn.secondary {
-      border: 1px solid var(--line);
-      background: transparent;
-      color: var(--text);
+    .btn:hover { border-color: var(--blue); }
+    .btn.primary {
+      border: 0;
+      background: linear-gradient(110deg, var(--blue), var(--purple));
     }
 
-    .btn:disabled { opacity: .55; cursor: wait; }
+    .btn:disabled { opacity: .5; cursor: wait; }
 
-    .empty, .status {
-      padding: 20px 14px;
-      border: 1px dashed var(--line);
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 9px;
+      margin-bottom: 13px;
+    }
+
+    input, select {
+      background: #0b1728;
+      color: white;
+      border: 1px solid #2b3c55;
+      border-radius: 11px;
+      padding: 12px;
+      outline: none;
+      min-width: 0;
+    }
+
+    input:focus, select:focus { border-color: var(--blue); }
+    .search { flex: 1; min-width: 180px; width: 100%; }
+
+    .table-wrap { width: 100%; overflow-x: auto; }
+
+    table { width: 100%; border-collapse: collapse; min-width: 570px; }
+
+    th, td {
+      padding: 13px 10px;
+      text-align: left;
+      border-bottom: 1px solid #25344b;
+      white-space: nowrap;
+    }
+
+    th { color: var(--muted); font-size: 12px; font-weight: 600; }
+    td { font-size: 13px; }
+    tr:last-child td { border-bottom: 0; }
+
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: inline-grid;
+      place-items: center;
+      background: #4a4798;
+      font-weight: 800;
+      margin-right: 8px;
+      vertical-align: middle;
+    }
+
+    .user-cell { display: flex; align-items: center; gap: 5px; }
+    .green { color: var(--green); }
+    .empty { padding: 25px; text-align: center; color: var(--muted); }
+
+    .bars { display: grid; gap: 17px; }
+    .bar-row { display: grid; grid-template-columns: 80px 1fr 48px; gap: 10px; align-items: center; }
+    .bar-track { height: 10px; border-radius: 20px; background: #202f46; overflow: hidden; }
+    .bar-fill { height: 100%; border-radius: 20px; background: linear-gradient(90deg, var(--blue), #d43df2); }
+
+    .section-title { margin: 5px 0 15px; font-size: 22px; }
+
+    .history-item {
+      border: 1px solid var(--border);
       border-radius: 14px;
-      background: var(--panel);
-      color: var(--muted);
-      text-align: center;
+      padding: 14px;
+      margin-bottom: 12px;
+      background: #152338;
+      overflow: hidden;
+    }
+
+    .history-url {
+      display: block;
+      color: #d8e6ff;
+      overflow-wrap: anywhere;
+      margin-bottom: 7px;
+    }
+
+    .media-player {
+      width: 100%;
+      max-height: 480px;
+      margin-top: 12px;
+      background: #05080d;
+      border-radius: 12px;
+    }
+
+    .media-image {
+      width: 100%;
+      max-height: 450px;
+      object-fit: contain;
+      margin-top: 12px;
+      border-radius: 12px;
+      background: #05080d;
+    }
+
+    .notice {
+      border: 1px solid #5d496a;
+      background: #251c34;
+      border-radius: 12px;
+      padding: 12px;
+      margin: 12px 0;
       overflow-wrap: anywhere;
     }
 
-    .status.error { color: var(--danger); white-space: pre-wrap; }
+    .footer {
+      text-align: center;
+      color: #7187a5;
+      padding: 22px 0 8px;
+      font-size: 12px;
+    }
 
-    .download { padding: 13px; min-width: 0; }
-    .download-meta { margin: 4px 0 10px; overflow-wrap: anywhere; }
-    .actions { flex-wrap: wrap; gap: 8px; }
     .hidden { display: none !important; }
-    .back { margin-bottom: 12px; }
-    .foot { margin-top: 24px; text-align: center; }
+    .loading { color: var(--muted); padding: 20px; text-align: center; }
 
-    @media (max-width: 420px) {
-      .stats { gap: 7px; }
-      .stat { padding: 11px 9px; }
-      .stat .num { font-size: 21px; }
-      .user { padding: 10px; gap: 8px; }
-      .user .btn { padding: 9px; font-size: 12px; }
+    @media (max-width: 1100px) {
+      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .platforms { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+      .content-grid { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 700px) {
+      .topbar { height: 65px; padding: 0 13px; }
+      .brand-icon { width: 39px; height: 39px; }
+      .brand-name { font-size: 17px; }
+      .top-right .muted, .top-right .date { display: none; }
+      .shell { display: block; }
+      aside {
+        position: sticky;
+        top: 65px;
+        z-index: 9;
+        display: flex;
+        flex-direction: row;
+        overflow-x: auto;
+        padding: 8px;
+        border-right: 0;
+        border-bottom: 1px solid var(--border);
+      }
+      .nav { flex: 0 0 auto; width: auto; padding: 10px 12px; }
+      .nav span:last-child { display: none; }
+      .side-bottom { display: none; }
+      main { padding: 12px; }
+      .stats { gap: 9px; }
+      .stat { padding: 12px; min-height: 104px; }
+      .stat-icon { width: 36px; height: 36px; font-size: 18px; }
+      .stat-label { font-size: 11px; }
+      .stat-number { font-size: 25px; }
+      .platforms { gap: 9px; }
+      .platform { padding: 11px; gap: 8px; }
+      .platform-symbol { width: 35px; height: 35px; font-size: 18px; }
+      .platform strong { font-size: 12px; }
+      .platform span { font-size: 10px; }
+      .card { padding: 13px; }
+      .card-heading { align-items: flex-start; }
+      .section-title { font-size: 19px; }
+      .bar-row { grid-template-columns: 65px 1fr 35px; }
+    }
+
+    @media (max-width: 360px) {
+      .stats { grid-template-columns: 1fr 1fr; }
+      .platforms { grid-template-columns: 1fr; }
     }
   </style>
 </head>
-
 <body>
-  <main class="wrap">
-    <header class="top">
-      <div class="brand">
-        <div class="logo">S</div>
-        <div>
-          <div class="title">Savebot Admin</div>
-          <div class="subtitle">Yuklamalar va foydalanuvchilar</div>
-        </div>
+<div class="layout">
+  <header class="topbar">
+    <div class="brand">
+      <div class="brand-icon">➤</div>
+      <div>
+        <div class="brand-name">Save_svbot</div>
+        <div class="muted small">Admin panel</div>
       </div>
-      <div class="pill" id="connection">Ulanmoqda…</div>
-    </header>
+    </div>
+    <div class="top-right">
+      <div class="date muted small" id="currentDate"></div>
+      <div class="profile" id="profileAvatar">A</div>
+      <strong id="adminName">Admin</strong>
+    </div>
+  </header>
 
-    <div id="status" class="status">Admin ma’lumotlari yuklanmoqda…</div>
-
-    <section id="dashboard" class="hidden">
-      <div class="stats">
-        <div class="stat">
-          <div class="label">Jami foydalanuvchilar</div>
-          <div class="num" id="totalUsers">—</div>
-        </div>
-        <div class="stat">
-          <div class="label">Jami yuklamalar</div>
-          <div class="num" id="totalDownloads">—</div>
-        </div>
-        <div class="stat">
-          <div class="label">Bugun faol</div>
-          <div class="num" id="todayActive">—</div>
-        </div>
+  <div class="shell">
+    <aside>
+      <button class="nav active" data-page="home"><span class="nav-icon">⌂</span><span>Bosh sahifa</span></button>
+      <button class="nav" data-page="users"><span class="nav-icon">♙</span><span>Foydalanuvchilar</span></button>
+      <button class="nav" data-page="downloads"><span class="nav-icon">⇩</span><span>Yuklamalar</span></button>
+      <button class="nav" data-page="stats"><span class="nav-icon">▥</span><span>Statistika</span></button>
+      <div class="side-bottom">
+        <strong>👑 Save_svbot</strong>
+        <p class="muted small">Instagram, YouTube, TikTok va boshqa platformalardan video yuklash boti.</p>
+        <button class="btn primary" id="openBot">➤ Botni ochish</button>
       </div>
+    </aside>
 
-      <div id="userSection">
-        <div class="section-head">
-          <h2>Foydalanuvchilar</h2>
-          <button class="btn secondary" id="refresh">Yangilash</button>
-        </div>
-
-        <input
-          class="search"
-          id="search"
-          type="search"
-          placeholder="Ism yoki Telegram ID bo‘yicha qidirish…"
-          autocomplete="off"
-        >
-
-        <div class="users" id="users" style="margin-top:12px"></div>
-      </div>
-
-      <div id="historySection" class="hidden">
-        <div class="section-head">
-          <div>
-            <button class="btn secondary back" id="back">← Orqaga</button>
-            <h2 id="historyTitle">Yuklamalar tarixi</h2>
-            <div id="historyMeta" class="subtitle"></div>
+    <main>
+      <section class="page active" id="page-home">
+        <div class="stats">
+          <div class="stat">
+            <div class="stat-top"><div class="stat-icon">♙</div><div class="stat-label">Jami foydalanuvchilar</div></div>
+            <div class="stat-number" id="totalUsers">—</div>
+            <div class="muted small">Barcha vaqt davomida</div>
+          </div>
+          <div class="stat">
+            <div class="stat-top"><div class="stat-icon">⇩</div><div class="stat-label">Jami yuklamalar</div></div>
+            <div class="stat-number" id="totalDownloads">—</div>
+            <div class="muted small">Barcha vaqt davomida</div>
+          </div>
+          <div class="stat">
+            <div class="stat-top"><div class="stat-icon">▤</div><div class="stat-label">Bugungi yuklamalar</div></div>
+            <div class="stat-number" id="todayActive">—</div>
+            <div class="muted small">Bugungi faollik</div>
+          </div>
+          <div class="stat">
+            <div class="stat-top"><div class="stat-icon">◉</div><div class="stat-label">Faol foydalanuvchilar</div></div>
+            <div class="stat-number" id="activeUsers">—</div>
+            <div class="muted small">Tarixda yuklamasi bor</div>
           </div>
         </div>
-        <div class="downloads" id="downloads"></div>
-      </div>
-    </section>
 
-    <footer class="foot">Savebot • Admin panel</footer>
-  </main>
-
-  <script>
-  (() => {
-    'use strict';
-
-    const tg = window.Telegram && window.Telegram.WebApp;
-
-    if (tg) {
-      tg.ready();
-      tg.expand();
-    }
-
-    const initData = tg && tg.initData ? tg.initData : '';
-    const headers = { 'X-Telegram-Init-Data': initData };
-
-    const el = id => document.getElementById(id);
-    let allUsers = [];
-
-    function showError(message) {
-      el('status').className = 'status error';
-      el('status').textContent = message;
-      el('status').classList.remove('hidden');
-      el('dashboard').classList.add('hidden');
-      el('connection').textContent = 'Xatolik';
-    }
-
-    async function request(path) {
-      if (!initData) {
-        throw new Error(
-          'Telegram sessiyasi topilmadi. Mini App’ni bot ichidagi tugma orqali oching. Oddiy brauzerda ochmang.'
-        );
-      }
-
-      const response = await fetch(path, {
-        method: 'GET',
-        headers,
-        cache: 'no-store'
-      });
-
-      if (!response.ok) {
-        const body = await response.text();
-        let detail = body;
-
-        try {
-          const parsed = JSON.parse(body);
-          detail = parsed.detail || body;
-        } catch (_) {}
-
-        throw new Error(
-          `API xatosi: ${response.status} — ${detail || response.statusText}`
-        );
-      }
-
-      return response;
-    }
-
-    function first(obj, keys, fallback = '') {
-      if (!obj || typeof obj !== 'object') return fallback;
-
-      for (const key of keys) {
-        if (obj[key] !== undefined && obj[key] !== null && obj[key] !== '') {
-          return obj[key];
-        }
-      }
-
-      return fallback;
-    }
-
-    function fmt(value) {
-      if (value === null || value === undefined || value === '') return '—';
-      if (typeof value === 'number') return value.toLocaleString('uz-UZ');
-      return String(value);
-    }
-
-    function make(tag, className, text) {
-      const node = document.createElement(tag);
-
-      if (className) node.className = className;
-      if (text !== undefined) node.textContent = String(text ?? '');
-
-      return node;
-    }
-
-    function userId(user) {
-      return first(user, ['user_id', 'telegram_id', 'id', 'tg_id'], '');
-    }
-
-    function userName(user) {
-      const firstName = first(
-        user,
-        ['first_name', 'firstName', 'name', 'username']
-      );
-
-      const lastName = first(user, ['last_name', 'lastName']);
-
-      const fullName = [firstName, lastName].filter(Boolean).join(' ');
-
-      return fullName ||
-        (userId(user) ? `Foydalanuvchi ${userId(user)}` : 'Noma’lum foydalanuvchi');
-    }
-
-    function renderUsers() {
-      const query = el('search').value.trim().toLocaleLowerCase();
-
-      const filtered = allUsers.filter(user => {
-        const searchable = [
-          userName(user),
-          userId(user),
-          first(user, ['username'], '')
-        ].join(' ').toLocaleLowerCase();
-
-        return searchable.includes(query);
-      });
-
-      const container = el('users');
-      container.replaceChildren();
-
-      if (!filtered.length) {
-        container.append(
-          make(
-            'div',
-            'empty',
-            query
-              ? 'Qidiruv bo‘yicha foydalanuvchi topilmadi.'
-              : 'Foydalanuvchilar ro‘yxati bo‘sh.'
-          )
-        );
-        return;
-      }
-
-      filtered.forEach(user => {
-        const card = make('article', 'user');
-
-        const avatar = make(
-          'div',
-          'avatar',
-          userName(user).trim().slice(0, 1).toUpperCase() || 'U'
-        );
-
-        const info = make('div', 'user-info');
-
-        info.append(make('div', 'user-name', userName(user)));
-
-        const username = first(user, ['username'], '');
-        const usernameText = username
-          ? '@' + String(username).replace(/^@/, '') + ' · '
-          : '';
-
-        info.append(
-          make('div', 'user-meta', `${usernameText}ID: ${fmt(userId(user))}`)
-        );
-
-        const count = first(
-          user,
-          ['downloads_count', 'download_count', 'total_downloads', 'downloads'],
-          null
-        );
-
-        if (count !== null && typeof count !== 'object') {
-          info.append(make('div', 'user-meta', `Yuklamalar: ${fmt(count)}`));
-        }
-
-        const button = make('button', 'btn', 'Tarix');
-        button.type = 'button';
-        button.addEventListener('click', () => openHistory(user));
-
-        card.append(avatar, info, button);
-        container.append(card);
-      });
-    }
-
-    async function loadDashboard() {
-      el('refresh').disabled = true;
-      el('connection').textContent = 'Yuklanmoqda…';
-      el('status').className = 'status';
-      el('status').textContent = 'Admin ma’lumotlari yuklanmoqda…';
-      el('status').classList.remove('hidden');
-
-      try {
-        const response = await request('/api/dashboard');
-        const data = await response.json();
-
-        el('totalUsers').textContent = fmt(data.total_users);
-        el('totalDownloads').textContent = fmt(data.total_downloads);
-        el('todayActive').textContent = fmt(data.today_active);
-
-        allUsers = Array.isArray(data.users) ? data.users : [];
-
-        renderUsers();
-
-        el('status').classList.add('hidden');
-        el('dashboard').classList.remove('hidden');
-        el('userSection').classList.remove('hidden');
-        el('historySection').classList.add('hidden');
-        el('connection').textContent = 'Ulangan';
-      } catch (error) {
-        showError(
-          error && error.message
-            ? error.message
-            : 'Noma’lum xatolik yuz berdi.'
-        );
-      } finally {
-        el('refresh').disabled = false;
-      }
-    }
-
-    async function openHistory(user) {
-      const id = userId(user);
-
-      if (id === '') {
-        showError('Bu foydalanuvchining ID raqami topilmadi.');
-        return;
-      }
-
-      el('userSection').classList.add('hidden');
-      el('historySection').classList.remove('hidden');
-      el('historyTitle').textContent = userName(user);
-      el('historyMeta').textContent = `Telegram ID: ${id}`;
-
-      const container = el('downloads');
-      container.replaceChildren(
-        make('div', 'status', 'Yuklamalar tarixi olinmoqda…')
-      );
-
-      try {
-        const response = await request(
-          `/api/users/${encodeURIComponent(id)}/downloads`
-        );
-
-        const data = await response.json();
-        const rows = Array.isArray(data.downloads) ? data.downloads : [];
-
-        container.replaceChildren();
-
-        if (!rows.length) {
-          container.append(
-            make('div', 'empty', 'Bu foydalanuvchida yuklamalar tarixi topilmadi.')
-          );
-          return;
-        }
-
-        rows.forEach(item => {
-          const card = make('article', 'download');
-
-          const title = first(
-            item,
-            ['title', 'original_name', 'filename', 'file_name', 'url', 'source_url'],
-            'Media fayl'
-          );
-
-          card.append(make('div', 'download-title', title));
-
-          const date = first(
-            item,
-            ['created_at', 'downloaded_at', 'date', 'timestamp'],
-            ''
-          );
-
-          const platform = first(item, ['platform', 'source', 'service'], '');
-
-          const meta = [
-            platform,
-            date,
-            item.id !== undefined ? `ID: ${item.id}` : ''
-          ].filter(Boolean).join(' · ');
-
-          card.append(
-            make('div', 'download-meta', meta || 'Yuklama ma’lumoti')
-          );
-
-          const actions = make('div', 'actions');
-
-          const assetId = first(
-            item,
-            ['asset_id', 'media_asset_id', 'media_id'],
-            null
-          );
-
-          if (assetId !== null) {
-            const open = make('button', 'btn', 'Media ochish');
-            open.type = 'button';
-
-            open.addEventListener('click', async () => {
-              try {
-                const res = await request(
-                  `/api/media/${encodeURIComponent(assetId)}`
-                );
-
-                const blob = await res.blob();
-                const url = URL.createObjectURL(blob);
-                const win = window.open(url, '_blank');
-
-                if (!win) {
-                  const link = document.createElement('a');
-                  link.href = url;
-                  link.download = String(title);
-                  link.click();
-                }
-
-                setTimeout(() => URL.revokeObjectURL(url), 60000);
-              } catch (error) {
-                alert(error.message || 'Media ochilmadi.');
-              }
-            });
-
-            actions.append(open);
-          }
-
-          const sourceUrl = first(
-            item,
-            ['url', 'source_url', 'original_url'],
-            null
-          );
-
-          if (sourceUrl && /^https?:\/\//i.test(String(sourceUrl))) {
-            const link = make('a', 'btn secondary', 'Manbani ochish');
-            link.href = sourceUrl;
-            link.target = '_blank';
-            link.rel = 'noopener noreferrer';
-            actions.append(link);
-          }
-
-          if (actions.childElementCount) card.append(actions);
-          container.append(card);
-        });
-      } catch (error) {
-        container.replaceChildren(
-          make(
-            'div',
-            'status error',
-            error && error.message
-              ? error.message
-              : 'Yuklamalar tarixini olishda xatolik.'
-          )
-        );
-      }
-    }
-
-    el('search').addEventListener('input', renderUsers);
-    el('refresh').addEventListener('click', loadDashboard);
-
-    el('back').addEventListener('click', () => {
-      el('historySection').classList.add('hidden');
-      el('userSection').classList.remove('hidden');
+        <div class="platforms">
+          <div class="platform"><div class="platform-symbol">📸</div><div><strong>Instagram</strong><span>Reels, Post, Story</span></div></div>
+          <div class="platform"><div class="platform-symbol">▶️</div><div><strong>YouTube</strong><span>Video, Shorts</span></div></div>
+          <div class="platform"><div class="platform-symbol">🎵</div><div><strong>TikTok</strong><span>Videolar</span></div></div>
+          <div class="platform"><div class="platform-symbol">🔗</div><div><strong>Boshqa</strong><span>Boshqa platformalar</span></div></div>
+        </div>
+
+        <div class="content-grid">
+          <div class="card">
+            <div class="card-heading">
+              <h2>◷ So‘nggi yuklamalar</h2>
+              <button class="btn" data-goto="downloads">Barchasini ko‘rish →</button>
+            </div>
+            <div class="table-wrap">
+              <table>
+                <thead><tr><th>#</th><th>Foydalanuvchi</th><th>Platforma</th><th>Holat</th><th>Vaqt</th></tr></thead>
+                <tbody id="recentDownloads"><tr><td colspan="5" class="empty">Ma’lumot yuklanmoqda...</td></tr></tbody>
+              </table>
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-heading"><h2>▥ Platformalar bo‘yicha</h2></div>
+            <div id="platformBars" class="bars"><div class="loading">Yuklanmoqda...</div></div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-heading">
+            <h2>♙ Foydalanuvchilar ro‘yxati</h2>
+            <button class="btn" data-goto="users">Barchasi →</button>
+          </div>
+          <div class="toolbar">
+            <input class="search" id="homeSearch" placeholder="Ism yoki Telegram ID bo‘yicha qidirish...">
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>#</th><th>Foydalanuvchi</th><th>Telegram ID</th><th>Yuklamalar</th><th>Oxirgi faollik</th><th></th></tr></thead>
+              <tbody id="homeUsers"><tr><td colspan="6" class="empty">Ma’lumot yuklanmoqda...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-users">
+        <h2 class="section-title">Foydalanuvchilar</h2>
+        <div class="card">
+          <div class="toolbar">
+            <input class="search" id="usersSearch" placeholder="Ism, username yoki Telegram ID...">
+            <button class="btn" id="refreshUsers">↻ Yangilash</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead><tr><th>#</th><th>Foydalanuvchi</th><th>Telegram ID</th><th>Yuklamalar</th><th>Oxirgi faollik</th><th>Tarix</th></tr></thead>
+              <tbody id="usersTable"><tr><td colspan="6" class="empty">Yuklanmoqda...</td></tr></tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-downloads">
+        <h2 class="section-title">Yuklamalar tarixi</h2>
+        <div class="card">
+          <div class="toolbar">
+            <input class="search" id="downloadsSearch" placeholder="Platforma yoki manba URL bo‘yicha qidirish...">
+          </div>
+          <div id="allDownloads"><div class="loading">Avval foydalanuvchi tanlang yoki uning tarixini oching.</div></div>
+        </div>
+      </section>
+
+      <section class="page" id="page-stats">
+        <h2 class="section-title">Statistika</h2>
+        <div class="stats">
+          <div class="stat"><div class="stat-label">Jami foydalanuvchilar</div><div class="stat-number" id="statsUsers">—</div></div>
+          <div class="stat"><div class="stat-label">Jami yuklamalar</div><div class="stat-number" id="statsDownloads">—</div></div>
+        </div>
+        <div class="content-grid">
+          <div class="card">
+            <h2>Platformalar taqsimoti</h2>
+            <canvas id="platformChart" height="240"></canvas>
+          </div>
+          <div class="card">
+            <h2>Platformalar ro‘yxati</h2>
+            <div id="statsPlatformBars" class="bars" style="margin-top:20px"></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="page" id="page-history">
+        <button class="btn" id="backToUsers">← Orqaga</button>
+        <h2 class="section-title" id="historyTitle" style="margin-top:18px">Foydalanuvchi tarixi</h2>
+        <div class="muted" id="historySubtitle"></div>
+        <div id="historyList" style="margin-top:18px"><div class="loading">Tarix yuklanmoqda...</div></div>
+      </section>
+
+      <div class="footer">Savebot • Admin panel</div>
+    </main>
+  </div>
+</div>
+
+<script>
+(() => {
+  const tg = window.Telegram?.WebApp;
+  tg?.ready();
+  tg?.expand();
+
+  const initData = tg?.initData || "";
+  const $ = id => document.getElementById(id);
+  const allUsers = [];
+  let dashboard = { total_users: 0, total_downloads: 0, today_active: 0, users: [] };
+  let chart = null;
+  let currentHistoryUser = null;
+
+  $("currentDate").textContent = new Date().toLocaleString("uz-UZ", {
+    day: "2-digit", month: "short", year: "numeric",
+    hour: "2-digit", minute: "2-digit"
+  });
+
+  if (tg?.initDataUnsafe?.user) {
+    const u = tg.initDataUnsafe.user;
+    $("adminName").textContent = u.first_name || "Admin";
+    $("profileAvatar").textContent = (u.first_name || "A").slice(0,1).toUpperCase();
+  }
+
+  $("openBot").onclick = () => {
+    if (tg) tg.openTelegramLink("https://t.me/save_sv_bot");
+    else window.open("https://t.me/save_sv_bot", "_blank");
+  };
+
+  function escapeHtml(value) {
+    return String(value ?? "").replace(/[&<>"']/g, ch => ({
+      "&":"&amp;", "<":"&lt;", ">":"&gt;", '"':"&quot;", "'":"&#39;"
+    })[ch]);
+  }
+
+  function dateText(value) {
+    if (!value) return "—";
+    const d = new Date(value);
+    if (Number.isNaN(d.getTime())) return String(value);
+    return d.toLocaleString("uz-UZ", {
+      day: "2-digit", month: "2-digit", year: "numeric",
+      hour: "2-digit", minute: "2-digit"
     });
+  }
 
-    loadDashboard();
-  })();
-  </script>
+  function platformName(value) {
+    const p = String(value || "other").toLowerCase();
+    if (p.includes("instagram")) return "Instagram";
+    if (p.includes("youtube")) return "YouTube";
+    if (p.includes("tiktok")) return "TikTok";
+    return "Boshqa";
+  }
+
+  function platformIcon(value) {
+    const p = platformName(value);
+    return p === "Instagram" ? "📸" : p === "YouTube" ? "▶️" :
+           p === "TikTok" ? "🎵" : "🔗";
+  }
+
+  async function api(path) {
+    const response = await fetch(path, {
+      headers: { "X-Telegram-Init-Data": initData }
+    });
+    if (!response.ok) {
+      const message = await response.text().catch(() => "");
+      throw new Error(`Server xatosi (${response.status}) ${message.slice(0,180)}`);
+    }
+    return response;
+  }
+
+  function showPage(name) {
+    document.querySelectorAll(".page").forEach(p => p.classList.remove("active"));
+    $("page-" + name)?.classList.add("active");
+    document.querySelectorAll(".nav").forEach(b =>
+      b.classList.toggle("active", b.dataset.page === name)
+    );
+  }
+
+  document.querySelectorAll(".nav").forEach(button => {
+    button.addEventListener("click", () => showPage(button.dataset.page));
+  });
+
+  document.querySelectorAll("[data-goto]").forEach(button => {
+    button.addEventListener("click", () => showPage(button.dataset.goto));
+  });
+
+  function renderUsers(list, targetId) {
+    const target = $(targetId);
+    if (!list.length) {
+      target.innerHTML = `<tr><td colspan="6" class="empty">Foydalanuvchi topilmadi.</td></tr>`;
+      return;
+    }
+
+    target.innerHTML = list.map((u, index) => `
+      <tr>
+        <td>${index + 1}</td>
+        <td><div class="user-cell"><span class="avatar">${escapeHtml((u.full_name || "U").slice(0,1).toUpperCase())}</span>
+          <span><strong>${escapeHtml(u.full_name || "Noma’lum")}</strong><br>
+          <span class="muted small">${u.username ? "@"+escapeHtml(u.username) : "Telegram foydalanuvchisi"}</span></span></div></td>
+        <td>${escapeHtml(u.user_id)}</td>
+        <td class="green"><strong>${Number(u.download_count || 0)}</strong></td>
+        <td>${escapeHtml(dateText(u.last_download || u.joined_at))}</td>
+        <td><button class="btn history-btn" data-user="${escapeHtml(u.user_id)}">Tarix</button></td>
+      </tr>`).join("");
+
+    target.querySelectorAll(".history-btn").forEach(button => {
+      button.addEventListener("click", () => openHistory(button.dataset.user));
+    });
+  }
+
+  function filterUsers(query, target) {
+    const q = query.trim().toLowerCase();
+    const filtered = allUsers.filter(u =>
+      [u.full_name, u.username, u.user_id].some(v =>
+        String(v || "").toLowerCase().includes(q)
+      )
+    );
+    renderUsers(filtered, target);
+  }
+
+  $("homeSearch").addEventListener("input", e => filterUsers(e.target.value, "homeUsers"));
+  $("usersSearch").addEventListener("input", e => filterUsers(e.target.value, "usersTable"));
+  $("refreshUsers").onclick = loadDashboard;
+
+  function getPlatformCounts(users) {
+    const counts = { Instagram: 0, YouTube: 0, TikTok: 0, Boshqa: 0 };
+    users.forEach(u => {
+      // User endpoint supplies aggregate download counts, not per-platform counts.
+      // Platform values are populated from the histories we have actually loaded.
+    });
+    return counts;
+  }
+
+  const knownPlatformCounts = { Instagram: 0, YouTube: 0, TikTok: 0, Boshqa: 0 };
+
+  function renderBars(targetId, counts) {
+    const total = Object.values(counts).reduce((sum, n) => sum + n, 0);
+    $(targetId).innerHTML = Object.entries(counts).map(([name, count]) => `
+      <div class="bar-row">
+        <span>${platformIcon(name)} ${name}</span>
+        <div class="bar-track"><div class="bar-fill" style="width:${total ? count/total*100 : 0}%"></div></div>
+        <strong>${count}</strong>
+      </div>`).join("");
+  }
+
+  function renderPlatformChart(counts) {
+    const canvas = $("platformChart");
+    if (!canvas || !window.Chart) return;
+    if (chart) chart.destroy();
+    chart = new Chart(canvas, {
+      type: "doughnut",
+      data: {
+        labels: Object.keys(counts),
+        datasets: [{ data: Object.values(counts), backgroundColor: ["#e84b9b","#ff3d55","#27c5bb","#8258ff"], borderWidth: 0 }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { labels: { color: "#dbe7f8" } } }
+      }
+    });
+  }
+
+  function renderRecentDownloads() {
+    const recent = [...allUsers]
+      .filter(u => u.last_download)
+      .sort((a,b) => new Date(b.last_download) - new Date(a.last_download))
+      .slice(0, 8);
+
+    $("recentDownloads").innerHTML = recent.length ? recent.map((u, i) => `
+      <tr>
+        <td>${i+1}</td>
+        <td>${escapeHtml(u.full_name || u.user_id)}</td>
+        <td>—</td>
+        <td><span class="muted">Tarixdan oching</span></td>
+        <td>${escapeHtml(dateText(u.last_download))}</td>
+      </tr>`).join("") :
+      `<tr><td colspan="5" class="empty">Hozircha yuklama yo‘q.</td></tr>`;
+  }
+
+  async function loadDashboard() {
+    try {
+      const response = await api("/api/dashboard");
+      dashboard = await response.json();
+      $("totalUsers").textContent = dashboard.total_users ?? 0;
+      $("totalDownloads").textContent = dashboard.total_downloads ?? 0;
+      $("todayActive").textContent = dashboard.today_active ?? 0;
+      $("statsUsers").textContent = dashboard.total_users ?? 0;
+      $("statsDownloads").textContent = dashboard.total_downloads ?? 0;
+
+      allUsers.splice(0, allUsers.length, ...(dashboard.users || []));
+      $("activeUsers").textContent = allUsers.filter(u => Number(u.download_count || 0) > 0).length;
+      renderUsers(allUsers, "homeUsers");
+      renderUsers(allUsers, "usersTable");
+      renderRecentDownloads();
+
+      // Dashboard API currently returns aggregate totals, not platform-level counts.
+      // Do not fabricate per-platform statistics.
+      renderBars("platformBars", knownPlatformCounts);
+      renderBars("statsPlatformBars", knownPlatformCounts);
+      renderPlatformChart(knownPlatformCounts);
+    } catch (error) {
+      console.error(error);
+      $("recentDownloads").innerHTML = `<tr><td colspan="5" class="empty">${escapeHtml(error.message)}. Mini App faqat Telegram ichida ishlashi mumkin.</td></tr>`;
+      $("homeUsers").innerHTML = `<tr><td colspan="6" class="empty">${escapeHtml(error.message)}</td></tr>`;
+      $("usersTable").innerHTML = `<tr><td colspan="6" class="empty">${escapeHtml(error.message)}</td></tr>`;
+    }
+  }
+
+  function mediaMarkup(asset, userId, downloadId) {
+    if (!asset.available) {
+      return `<div class="notice">⚠️ Video fayli server arxivida topilmadi. Manba: ${escapeHtml(asset.name || "fayl nomi yo‘q")}</div>`;
+    }
+    return `
+      <button class="btn primary show-media" data-asset="${escapeHtml(asset.id)}">▶ Videoni ko‘rsatish</button>
+      <div class="media-result" id="media-${escapeHtml(asset.id)}"></div>`;
+  }
+
+  async function loadMedia(assetId, container) {
+    container.innerHTML = `<div class="loading">Video yuklanmoqda...</div>`;
+    try {
+      const response = await api(`/api/media/${encodeURIComponent(assetId)}`);
+      const blob = await response.blob();
+      const url = URL.createObjectURL(blob);
+      const type = blob.type || response.headers.get("content-type") || "";
+
+      if (type.startsWith("image/")) {
+        container.innerHTML = `<img class="media-image" alt="Yuklangan rasm" src="${url}">`;
+      } else if (type.startsWith("video/") || type === "application/octet-stream") {
+        container.innerHTML = `
+          <video class="media-player" controls playsinline preload="metadata">
+            <source src="${url}" type="${escapeHtml(type)}">
+            Brauzer ushbu videoni ijro eta olmaydi.
+          </video>`;
+      } else {
+        container.innerHTML = `<div class="notice">Fayl olindi, lekin brauzerda ko‘rsatish formati aniqlanmadi (${escapeHtml(type)}).</div>
+          <a class="btn" href="${url}" download="savebot-media">Faylni yuklab olish</a>`;
+      }
+    } catch (error) {
+      container.innerHTML = `<div class="notice">Videoni olib bo‘lmadi: ${escapeHtml(error.message)}. Railway Logs bo‘limini tekshiring.</div>`;
+    }
+  }
+
+  function renderHistory(items, targetId) {
+    const target = $(targetId);
+    if (!items || !items.length) {
+      target.innerHTML = `<div class="empty">Bu foydalanuvchida yuklamalar tarixi topilmadi.</div>`;
+      return;
+    }
+
+    target.innerHTML = items.map(item => {
+      const media = Array.isArray(item.media) ? item.media : [];
+      const mediaHtml = media.length ? media.map(asset => mediaMarkup(asset, currentHistoryUser, item.id)).join("") :
+        `<div class="muted small">Arxivlangan media fayl qayd etilmagan.</div>`;
+
+      return `
+        <article class="history-item">
+          <strong>${platformIcon(item.platform)} ${escapeHtml(platformName(item.platform))}</strong>
+          <span class="muted small"> · ${escapeHtml(dateText(item.timestamp))}</span>
+          <div class="muted small">Holat: ${escapeHtml(item.status || "Noma’lum")} · ID: ${escapeHtml(item.id)}</div>
+          ${item.source_url ? `<a class="history-url" href="${escapeHtml(item.source_url)}" target="_blank" rel="noopener noreferrer">${escapeHtml(item.source_url)}</a>` : ""}
+          ${mediaHtml}
+        </article>`;
+    }).join("");
+
+    target.querySelectorAll(".show-media").forEach(button => {
+      button.addEventListener("click", async () => {
+        const container = $("media-" + button.dataset.asset);
+        if (!container) return;
+        button.disabled = true;
+        await loadMedia(button.dataset.asset, container);
+        button.disabled = false;
+      });
+    });
+  }
+
+  async function openHistory(userId) {
+    currentHistoryUser = userId;
+    showPage("history");
+    $("historyTitle").textContent = "Yuklamalar tarixi";
+    const user = allUsers.find(u => String(u.user_id) === String(userId));
+    $("historySubtitle").textContent = `${user?.full_name || "Foydalanuvchi"} · Telegram ID: ${userId}`;
+    $("historyList").innerHTML = `<div class="loading">Tarix yuklanmoqda...</div>`;
+
+    try {
+      const response = await api(`/api/users/${encodeURIComponent(userId)}/downloads`);
+      const data = await response.json();
+      renderHistory(data.downloads || [], "historyList");
+    } catch (error) {
+      $("historyList").innerHTML = `<div class="notice">Tarixni yuklab bo‘lmadi: ${escapeHtml(error.message)}</div>`;
+    }
+  }
+
+  $("backToUsers").onclick = () => showPage("users");
+
+  $("downloadsSearch").addEventListener("input", e => {
+    const q = e.target.value.toLowerCase().trim();
+    document.querySelectorAll("#allDownloads .history-item").forEach(item => {
+      item.classList.toggle("hidden", !item.textContent.toLowerCase().includes(q));
+    });
+  });
+
+  // The download history API is scoped to one user; select a user to load it.
+  $("allDownloads").innerHTML = `
+    <div class="notice">Yuklamalar ro‘yxatini ko‘rish uchun “Foydalanuvchilar” bo‘limida foydalanuvchining “Tarix” tugmasini bosing. Har bir yozuv ichida video pleyer mavjud.</div>
+    <button class="btn primary" id="chooseUserForDownloads">Foydalanuvchini tanlash</button>`;
+  $("chooseUserForDownloads").onclick = () => showPage("users");
+
+  loadDashboard();
+})();
+</script>
 </body>
 </html>
