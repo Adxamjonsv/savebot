@@ -151,8 +151,10 @@ def verify_webapp_init_data(init_data: str) -> dict:
     check_string = "\n".join(
         f"{key}={value}" for key, value in sorted(fields.items())
     )
+    # Telegram Mini Apps initData validation:
+    # secret_key = HMAC_SHA256(key="WebAppData", msg=BOT_TOKEN)
     secret_key = hmac.new(
-        BOT_TOKEN.encode(), b"WebAppData", hashlib.sha256
+        b"WebAppData", BOT_TOKEN.encode("utf-8"), hashlib.sha256
     ).digest()
     expected_hash = hmac.new(
         secret_key, check_string.encode(), hashlib.sha256
