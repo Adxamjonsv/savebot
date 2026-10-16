@@ -287,6 +287,42 @@ async def mini_app_user_downloads(
     }
 
 
+@web_app.get("/api/gallery")
+async def mini_app_gallery(
+    platform: str = "all",
+    x_telegram_init_data: str = Header(default=""),
+) -> dict:
+    """Return archived media filtered by platform for the admin gallery."""
+    verify_webapp_init_data(x_telegram_init_data)
+
+    allowed_platforms = {"all", "instagram", "youtube", "tiktok", "other"}
+    selected = platform.strip().lower()
+    if selected not in allowed_platforms:
+        raise HTTPException(status_code=400, detail="Unsupported platform")
+
+    items = await db.admin_media_gallery(
+        None if selected == "all" else selected
+    )
+
+    media = [
+        {
+            "asset_id": item["asset_id"],
+            "download_id": item["download_id"],
+            "available": item["available"],
+            "media_type": item["media_type"],
+            "original_name": item["file_name"],
+            "user_id": item["user_id"],
+            "username": item["username"],
+            "platform": item["platform"],
+            "source_url": item["source_url"],
+            "timestamp": item["timestamp"],
+            "full_name": item["full_name"],
+        }
+        for item in items
+    ]
+    return {"platform": selected, "count": len(media), "media": media}
+
+
 @web_app.get("/api/media/{asset_id}")
 async def mini_app_media(
     asset_id: int,
